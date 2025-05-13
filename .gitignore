@@ -1,0 +1,41 @@
+# === VS CODE ====
+.vscode/
+
+
+# === Build Artifacts ===
+
+build/
+bin/
+out/
+*.o
+*.obj
+*.so
+*.exe
+*.a 
+*.dll
+*.dylib
+*.out
+
+# === CMAKE === 
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# === os / IDE Trash === 
+*.log
+*.tmp
+*.swp
+*.bak
+*.core
+*.dSYM/
+*.DS_Store
+Thumbs.db
+
+__pycache__/
+*.pyc
+
+*.dump
+*.db
+*.pid
+*.data
