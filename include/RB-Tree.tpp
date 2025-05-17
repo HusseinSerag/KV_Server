@@ -1,72 +1,74 @@
 #include <iostream>
+#include "RB-Tree.h"
 enum Color {RED, BLACK};
 
 template <typename T>
 class RedBlackTree;
-
-template <typename T>
-class RBNode {
-    T val;
-    RBNode* left;
-    RBNode* right;
-    RBNode* parent;
-    enum Color color;
-    int size;
-    public:
-    RBNode(T val, RBNode* left, RBNode* right, RBNode* parent, enum Color color, int size):val(val), left(left),right(right),parent(parent), color(color), size(size) {} 
-    
-     T  getVal() {
+  
+    template <typename T>
+    RBNode<T>::RBNode(T val, RBNode* left, RBNode* right, RBNode* parent, enum Color color, int size):val(val), left(left),right(right),parent(parent), color(color), size(size) {} 
+    template <typename T>
+     T  RBNode<T>::getVal() {
         return val;
      }
-     RBNode* getLeft() {
+     template <typename T>
+     RBNode<T>* RBNode<T>::getLeft() {
         return left;
      }
-     RBNode* getRight() {
+     template <typename T>
+     RBNode<T>* RBNode<T>::getRight() {
         return right;
      }
-     RBNode* getParent() {
+     template <typename T>
+     RBNode<T>* RBNode<T>::getParent() {
         return parent;
      }
-     enum Color getColor() {
+     template <typename T>
+     enum Color RBNode<T>::getColor() {
       return color;
      }
-     int getSize() {
+     template <typename T>
+     int RBNode<T>::getSize() {
       return size;
      }
-     void setVal(T val) {
+     template <typename T>
+     void RBNode<T>::setVal(T val) {
         this->val = val;
      }
-     void setLeft(RBNode* left){
+     template <typename T>
+     void RBNode<T>::setLeft(RBNode* left){
       this->left = left;
      }
-     void setRight(RBNode* right){
+     template <typename T>
+     void RBNode<T>::setRight(RBNode* right){
       this->right = right;
      }
-     void setParent(RBNode* parent) {
+     template <typename T>
+     void RBNode<T>::setParent(RBNode* parent) {
       this->parent = parent;
      }
-     void setColor(enum Color color){
+     template <typename T>
+     void RBNode<T>::setColor(enum Color color){
       this->color = color;
      }
-     void switchColor(){
+     template <typename T>
+     void RBNode<T>::switchColor(){
       this->color = this->color == RED ? BLACK : RED;
      }
-     void setSize(int size) {
+     template <typename T>
+     void RBNode<T>::setSize(int size) {
       this->size = size;
      }
 
-     friend class RedBlackTree<T>;
-};
+    
 
-template <typename T>
-class RedBlackTree {
 
-   RBNode<T>* root;
-   RBNode<T>* NIL;
-   int size;
 
-   
-   void rotate_left(RBNode<T> * node) {
+
+
+
+   template <typename T>
+   void RedBlackTree<T>::rotate_left(RBNode<T> * node) {
       bool isLeft = node->parent->left == node;
       RBNode<T> * rh = node->right;
       node->right = rh->left;
@@ -88,7 +90,8 @@ class RedBlackTree {
       rh->size = node->size;
       node->size = node->left->size + node->right->size + 1;
    }
-   void rotate_right(RBNode<T>* node) {
+   template <typename T>
+   void RedBlackTree<T>::rotate_right(RBNode<T>* node) {
     bool isLeft = node->parent->left == node;
     RBNode<T>* lf = node->left;
 
@@ -113,8 +116,8 @@ class RedBlackTree {
       node->size = node->left->size + node->right->size + 1;
     
 }
-
-   void insertion_violation(RBNode<T> * node) {
+template <typename T>
+   void RedBlackTree<T>::insertion_violation(RBNode<T> * node) {
       RBNode<T> * parent = nullptr;
          RBNode<T> * grand_parent = nullptr;
          
@@ -163,8 +166,8 @@ class RedBlackTree {
          }
          root->color = BLACK;
    }
-  
-   void delete_violation(RBNode<T>* node)   {
+  template <typename T>
+   void RedBlackTree<T>::delete_violation(RBNode<T>* node)   {
         while (node != root && node->color == BLACK) {
             if (node == node->parent->left) {
                RBNode<T>* sibling = node->parent->right;
@@ -235,7 +238,8 @@ class RedBlackTree {
         }
         node->color = BLACK;
     }
-    void _insert(RBNode<T>* n) {
+    template <typename T>
+    void RedBlackTree<T>::_insert(RBNode<T>* n) {
          
          
          if(root == NIL){
@@ -270,8 +274,8 @@ class RedBlackTree {
          insertion_violation(n);
          size++; 
       }
-   
-       RBNode<T>* _remove(RBNode<T>* toDelete){
+   template <typename T>
+       RBNode<T>* RedBlackTree<T>::_remove(RBNode<T>* toDelete){
          // search for value first
          
          if(toDelete == NIL){
@@ -371,27 +375,28 @@ class RedBlackTree {
          
       }
    
-   public:
-      ~RedBlackTree() {
+  template <typename T>
+      RedBlackTree<T>::~RedBlackTree() {
          deleteTree(root);
          delete NIL;
       }
-      RedBlackTree() {
+      template <typename T>
+      RedBlackTree<T>::RedBlackTree() {
          NIL = new RBNode<T>(T(),nullptr,nullptr,nullptr, BLACK, 0);
          root = NIL;
          size = 0;
-      }
-      void insert(T val){
+      }template <typename T>
+      void RedBlackTree<T>::insert(T val){
          RBNode<T>* n = new RBNode<T>(val, NIL,NIL, NIL, RED, 1);
          _insert(n);
-      }
-      void remove(T val) {
+      }template <typename T>
+      void RedBlackTree<T>::remove(T val) {
          RBNode<T>* toDelete = search(val);
          RBNode<T>* n = _remove(toDelete);
          if(n)
          delete n;
-      }
-      void updateByIndex(T val, int ind){
+      }template <typename T>
+      void RedBlackTree<T>::updateByIndex(T val, int ind){
         RBNode<T>* node = rank(ind);
         if(node != NIL){
          node = _remove(node);
@@ -399,30 +404,30 @@ class RedBlackTree {
          _insert(node);
         }
          
-      }
-      void removeByIndex(int ind){
+      }template <typename T>
+      void RedBlackTree<T>::removeByIndex(int ind){
          RBNode<T>* node = rank(ind);
         if(node != NIL){
          node = _remove(node);
         }
 
       }
-      
-      RBNode<T> *  minimum(RBNode<T> * root) {
+      template <typename T>
+      RBNode<T> *  RedBlackTree<T>::minimum(RBNode<T> * root) {
          RBNode<T> * temp = root;
          while(temp->left != NIL){
          temp = temp->left;
       }
       return temp;
-      }
-       RBNode<T> *  maximum(RBNode<T> * root) {
+      }template <typename T>
+       RBNode<T> *  RedBlackTree<T>::maximum(RBNode<T> * root) {
          RBNode<T> * temp = root;
          while(temp->right != NIL){
          temp = temp->right;
       }
       return temp;
-      }
-        void inorder(RBNode<T> * root, void (*cb)(T val)){
+      }template <typename T>
+        void RedBlackTree<T>::inorder(RBNode<T> * root, void (*cb)(T val)){
       if(root == NIL){
          return;
       }
@@ -431,15 +436,15 @@ class RedBlackTree {
       std::cout << "size: "<< root->size << " , " << root->val << std::endl;
       inorder(root->right,cb);
    }
-
-   RBNode<T> * getRoot() {
+template <typename T>
+   RBNode<T> * RedBlackTree<T>::getRoot() {
       return root;
-   }
-   int getSize() {
+   }template <typename T>
+   int RedBlackTree<T>::getSize() {
       return size;
    }
-
-    RBNode<T> * search(T val) {
+template <typename T>
+    RBNode<T> * RedBlackTree<T>::search(T val) {
        RBNode<T> * temp = root;
        while(temp != NIL){
          if(val == temp->val){
@@ -452,11 +457,11 @@ class RedBlackTree {
       }
       return NIL;
     }
-
-    const RBNode<T>* getNil() {
+template <typename T>
+    const RBNode<T>* RedBlackTree<T>::getNil() {
       return NIL;
-    }
-   RBNode<T>*  rank(int val){
+    }template <typename T>
+   RBNode<T>*  RedBlackTree<T>::rank(int val){
       RBNode<T>* temp = root;
 
     while (temp != NIL) {
@@ -475,8 +480,8 @@ class RedBlackTree {
     return NIL;  // Rank out of bounds
       
    }
-
-   void print(RBNode<T>* root, std::string indent, bool last){
+template <typename T>
+   void RedBlackTree<T>::print(RBNode<T>* root, std::string indent, bool last){
       if(root != NIL){
          std::cout << indent;
          if(last) {
@@ -493,15 +498,15 @@ class RedBlackTree {
       }
    }
 
-   
-   void deleteTree(RBNode<T>* root) {
+   template <typename T>
+   void RedBlackTree<T>::deleteTree(RBNode<T>* root) {
       // post order to delete
       if(root == NIL) return;
-      deleteTree(root->left);
-      deleteTree(root->right);
+      deleteTree<T>(root->left);
+      deleteTree<T>(root->right);
       delete root->val;
       delete root;
    }
-};
+
 
 
