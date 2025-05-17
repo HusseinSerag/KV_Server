@@ -39,3 +39,6 @@ __pycache__/
 *.db
 *.pid
 *.data
+
+data/
+logs/

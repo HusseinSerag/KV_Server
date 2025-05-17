@@ -23,6 +23,7 @@ Storage* Storage::instance = nullptr;
 
 Storage::Storage(){
 
+    table = nullptr;
 // try to load from disk first
 Config* config = Config::getInstance();
 // if persistence is on then read try to read from file
@@ -48,9 +49,20 @@ this->table = new Hashtable<std::string, Value*>(16);
 }
 
 
+Storage::~Storage() {
+
+    if(table){
+        delete table;
+        table = nullptr;
+    }
+}
 
 void Storage::deleteInstance() {
-    delete Storage::instance;
+        if(Storage::instance){
+
+            delete Storage::instance;
+            Storage::instance = nullptr;
+        }
 }
 
 void Storage::write(){
@@ -106,6 +118,7 @@ int capacity;
 in.read(reinterpret_cast<char *>(&capacity), sizeof(int));
 if(table) {
     delete table;
+    table = nullptr;
 }
 table = new Hashtable<std::string, Value*>(capacity);
 SinglyLinkedList<std::string,Value*>* arr = table->getArr();
@@ -141,7 +154,7 @@ for(int i = 0; i < capacity; i++){
     if(val){
     val->load(in);
     }
-    arr[i].appendToFront(key,val);
+    table->set(key, val);
         j++;
     }
 }

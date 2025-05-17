@@ -5,6 +5,7 @@
 #include <string>
 #include <deque>
 
+
 template <typename K, typename V>
 const float Hashtable<K,V>::LOAD_FACTOR_THRESHOLD = 0.75f;
 template <typename K, typename V>
@@ -16,7 +17,22 @@ Hashtable<K, V>::Hashtable(int capacity) {
 
 template <typename K, typename V>
 Hashtable<K, V>::~Hashtable() {
-    delete[] arr;
+    for (int i = 0; i < capacity; ++i) {
+    SinglyLinkedList<K, V>& list = arr[i];
+    Node<K, V>* current = list.getHead();
+    while (current) {
+        Node<K, V>* next = current->getNext();
+        delete current->getValue();             
+        current = next;
+    }
+}
+delete[] arr;  
+}
+template<typename K, typename V>
+void Hashtable<K,V>::unsafe_set(K key, V val) {
+    int ind = Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
+    arr[ind].appendToFront(key, val);
+    size++;
 }
 template<typename K, typename V>
 void Hashtable<K,V>::resize() {
@@ -29,7 +45,7 @@ void Hashtable<K,V>::resize() {
     for(int i = 0; i < oldCap ; i++){
         Node<K,V>* p = oldArr[i].getHead();
         while(p != NULL){
-        this->set(p->getKey(),p->getValue());
+        this->unsafe_set(p->getKey(),p->getValue());
         p = p->getNext();
         }
     }
@@ -92,7 +108,7 @@ std::deque<K> Hashtable<K,V>::keys() {
 }
 
 template <typename K, typename V>
-    int Hashtable<K,V>::getSize() {
+    unsigned int Hashtable<K,V>::getSize() {
         return this->size;
     }
 

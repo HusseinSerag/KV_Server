@@ -7,7 +7,8 @@
 #include <cstdio>
 #include "helpers.h"
 #include <cerrno>
-
+#include <atomic>
+std::atomic<bool> Server::should_exit(false);
     const size_t Server::k_max_msg = 32 << 20;
     Server::Server() {
         this->accepting_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -17,6 +18,11 @@
         this->connections = {};
         this->poll_fds = {};
 
+    }
+    Server::~Server() {
+        for(int i = 0 ; i < this->connections.size();i++){
+            if(this->connections[i]) delete this->connections[i];
+        }
     }
     void Server::configure(int port) {
         int val = 1;
@@ -42,7 +48,7 @@
     }
 
     void Server::start() {
-     while(true) {
+     while(!Server::should_exit) {
         //prepare the fds that will poll
         this->poll_fds.clear();
 

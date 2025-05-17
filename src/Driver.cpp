@@ -5,8 +5,28 @@
 #include <string>
 #include <exception>
 #include "Logger.h"
-int main(int argc, char* argv[]) {
+#include <csignal>
+#include <cstdlib>
 
+
+
+
+void cleanup() {
+
+    Storage::deleteInstance();
+    Config::deleteInstance();
+    Logger::close();
+}
+void handle_sigint(int signal) {
+
+
+        Server::should_exit = true;
+    
+
+
+}
+int main(int argc, char* argv[]) {
+    std::signal(SIGINT, handle_sigint);
     Server server;
     Config* config = Config::getInstance();
    if(!config->setup(argv + 1,  argc - 1)){
@@ -17,9 +37,8 @@ int main(int argc, char* argv[]) {
     server.configure(std::stoi(config->get("port")));
     Storage::getInstance();
     server.start();
-    Storage::deleteInstance();
-    Config::deleteInstance();
-    Logger::close();
+    cleanup();
+    
     return 0;
 
 

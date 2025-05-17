@@ -101,8 +101,11 @@ Config::Config() {
         return Config::instance;
     }
     void Config::deleteInstance(){
+        if(Config::instance){
 
-        delete Config::instance;
+            delete Config::instance;
+            Config::instance = nullptr;
+        }
 
     }
     std::string Config::getErrors() {

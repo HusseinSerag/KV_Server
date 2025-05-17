@@ -9,6 +9,7 @@
 // implement singeleton pattern for storage
 class Storage: public Serializable {
     Storage();
+    ~Storage();
     static Storage* instance;
     void load(std::istream &in);
     void save(std::ostream& out);

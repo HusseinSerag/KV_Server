@@ -8,7 +8,7 @@ class Hashtable {
 private:
     SinglyLinkedList<K, V>* arr;
     int capacity;
-    int size;
+    unsigned int size;
     const static float LOAD_FACTOR_THRESHOLD;
     void resize();
 
@@ -20,10 +20,11 @@ public:
     V get(K key);
     int remove(K key);
     std::deque<K> keys();
-    int getSize();
+    unsigned int getSize();
     int getCapacity();
     std::string table_toString();
     SinglyLinkedList<K, V>* getArr();
+    void unsafe_set(K key, V val);
 
 };
 
