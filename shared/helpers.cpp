@@ -100,3 +100,20 @@ std::string Helper::getCurrentTimestamp() {
     std::strtod(s.c_str(), &end);
     return end != s.c_str() && *end == '\0';
 }
+
+NumberKind Helper::isNumber(const std::string &s){
+    if(s.empty()) return NumberKind::NOT_NUMBER;
+    bool has_dot = false;
+    size_t i = 0;
+    if(s[i] == '-' || s[i] == '+') i++; // allow sign;
+    for(; i < s.size() ; i++){
+        if(s[i] == '.'){
+            if(has_dot) return NumberKind::NOT_NUMBER;
+            has_dot = true;
+        } else if(!isdigit(s[i])){
+            return NumberKind::NOT_NUMBER;
+        }
+    }
+    if(has_dot) return NumberKind::DOUBLE;
+    return NumberKind::INTEGER;
+}

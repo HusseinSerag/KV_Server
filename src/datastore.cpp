@@ -12,6 +12,7 @@
 #include "config.h"
 #include <filesystem>
 #include "Logger.h"
+#include "Value.h"
 Storage* Storage::instance = nullptr;
 
     Storage* Storage::getInstance() {
@@ -136,7 +137,7 @@ for(int i = 0; i < capacity; i++){
     in.read(&key[0],key_len);
 
     // read value here based on tag
-    uint16_t tag;
+    int16_t tag;
     in.read(reinterpret_cast<char*>(&tag),sizeof(tag));
     Value* val = NULL;
     if(tag == 0x01){
@@ -147,7 +148,6 @@ for(int i = 0; i < capacity; i++){
         val = new NumberValue<int64_t>(0);
     }
     else if(tag == 0x02) {
-
         val = new StringValue("");
 
     }

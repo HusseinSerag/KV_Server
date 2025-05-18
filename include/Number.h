@@ -5,19 +5,19 @@
 
 enum NumberCommand {
 
-    SET, DEL, MULT, INC, DEC, GET, DIVIDE, UNKNOWN
+    SET, MULT, INC, DEC,  DIVIDE, UNKNOWN
 
 };
 
 template <typename T>
 class Number : public Type {
-    T value;
+    double value;
 public:
 
-    int8_t read(const uint8_t* start, const uint8_t* end, Response& res) ;
+    int8_t read(std::vector<std::string> & command, Response& res) ;
    // void write(std::vector<uint8_t>& out_buffer, Response& res);
     void execute(Storage* storage, Response& res);
-    static enum NumberCommand parseCommand(std::string command);
+    static enum NumberCommand parseCommand(std::string& command);
 };
 
 

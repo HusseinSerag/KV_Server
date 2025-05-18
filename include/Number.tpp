@@ -1,49 +1,55 @@
-#pragma once
+
 #include "Number.h"
 #include <iostream>
 #include <string>
 #include "helpers.h"
 #include "exception.h"
 #include "ValueSet.h"
-#include "NumberValue.tpp"
+#include "NumberValue.h"
 #include "Logger.h"
+#include "Type.h"
+#include "String.h"
 
 template <typename T>
-int8_t Number<T>::read(const uint8_t* start, const uint8_t* end, Response& res) {
-
-    uint32_t len = 0;
-    if (!Helper::read_int<uint32_t>(start, end, len, 4)) return 0;
-
-    if (!Helper::read_str(start, end, len, command)) return 0;
-
-    uint32_t len_key = 0;
-    if (!Helper::read_int<uint32_t>(start, end, len_key, 4)) return 0;
-    if (!Helper::read_str(start, end, len_key, key)) return 0;
-    enum NumberCommand cmd = Number::parseCommand(command);
-     if((cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE )){
-        if(end - start != sizeof(T)){
-            res.status = ERROR;
-            res.output = "Please supply a number for this operation!";
-            return -1;
+int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
+      
+    if(command.size() < 2){
+        throw StorageException("atleast a command and key required!",ERROR );
+    }
+    if(command.size() > 3) {// error
+       // throw error
+        throw StorageException("invalid command!",ERROR );
+    }
+    this->command = command[0];
+    this->key = command[1];
+    enum NumberCommand cmd = parseCommand(this->command);
+    if(cmd == NumberCommand::DEC || cmd == NumberCommand::INC){
+        if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
+             throw StorageException("Value provided must be a number!",ERROR );
         }
-        if (!Helper::read_int<T>(start, end, value, sizeof(T))) return 0;
-     }
-
-
-    if (start != end) return 0; // trailing garbage
-
+        this->value = command.size() == 3 ? std::stod(command[2]) : 1;
+    }
+     else if(command.size() < 3 && (cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE )){
+         throw StorageException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
+    } 
+    if( cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE ){
+        if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
+             throw StorageException("Value provided must be a number!",ERROR );
+        }
+        this->value = std::stod(command[2]);
+    }
+    
+    
     return 1;
 }
 
 template <typename T>
-enum NumberCommand Number<T>::parseCommand(std::string command) {
+enum NumberCommand Number<T>::parseCommand(std::string& command) {
 
-    if(command == "set"){ return NumberCommand::SET; }
-    if(command == "get"){ return NumberCommand::GET; }
+   if(command == "set") {return NumberCommand::SET;}
     if(command == "mult") { return NumberCommand::MULT; }
     if(command == "dec") { return NumberCommand::DEC ;}
     if(command == "inc") {return NumberCommand::INC; }
-    if(command == "del") {return NumberCommand::DEL; }
     if(command == "div") {return NumberCommand::DIVIDE; }
     else return NumberCommand::UNKNOWN;
 }
@@ -62,15 +68,6 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 res.output = "OK";
                 break;
             }
-
-            case NumberCommand::GET: {
-                Value* val = Value::get(key);
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
-                if (!u64Val) throw StorageException("incorrect type for get", ERROR);
-                res.output = val->toString();
-                break;
-            }
-
             case NumberCommand::INC: {
                 Value* val = storage->table->get(key);
                 if (val == NULL) throw StorageException("not found", NOT_FOUND);
@@ -120,14 +117,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 res.output = "OK";
                 break;
             }
-
-            case NumberCommand::DEL: {
-                Value::del(key);
-                res.output = "OK";
-                break;
-            }
-
             default:
+            if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN){
+                 throw StorageException("Type mismatch: command '"+command+"' is not valid for number",ERROR);
+            }
                 throw StorageException("unknown command", ERROR);
         }
 

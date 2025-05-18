@@ -14,7 +14,7 @@ namespace Generic {
 
     enum GenericCommands {
 
-        KEYS, SIZE, CAPACITY, TABLE, UNKNOWN
+        KEYS, SIZE, CAPACITY, TABLE, UNKNOWN, GET, DEL
 
     };
 }
@@ -24,12 +24,12 @@ class Type {
 protected:
     std::string command;
     std::string key;
-    static enum Generic::GenericCommands _parseCommand(std::string command);
+    
+    public:
+    static enum Generic::GenericCommands _parseCommand(std::string& command);
 
-public:
-
-    virtual int8_t read(const uint8_t* start, const uint8_t* end, Response& res);
-    virtual void write(std::vector<uint8_t>& output, Response& res);
+    virtual int8_t read(std::vector<std::string>& request, Response& res);
+     static void write(std::vector<uint8_t>& output, Response& res);
     virtual void execute(Storage* storage, Response& res);
     virtual ~Type();
     Type();

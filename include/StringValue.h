@@ -17,6 +17,7 @@ class StringValue: public Value {
     std::string toString() const ;
     void save(std::ostream& out);
         void load(std::istream& in);
+        enum ValueType getType();
 
 };
 

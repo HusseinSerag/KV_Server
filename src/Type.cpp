@@ -9,7 +9,8 @@
 #include <deque>
 #include "exception.h"
 #include "Logger.h"
-
+#include "Number.h"
+#include "String.h"
 
 
 Type::~Type() {}
@@ -23,21 +24,28 @@ void Type::write(std::vector<uint8_t>& out_buffer, Response& res) {
     Connection::appendToBuffer(out_buffer, (const uint8_t*)res.output.data(), res.output.size());
 }
 
-int8_t Type::read(const uint8_t* start,const uint8_t* end, Response& res){
-      uint32_t len = 0;
-    if (!Helper::read_int<uint32_t>(start, end, len, 4)) return 0;
-    if (!Helper::read_str(start, end, len, command)) return 0;
-    if (start != end) return 0; // trailing garbage
+int8_t Type::read(std::vector<std::string> & command, Response& res){
+    this->command = command[0];
+    if(this-> command == "get" || this->command == "del"){
+        // TODO: IF COMMAND LESS THAN 2
+        if(command.size() != 2){
+             throw StorageException("format is " + this->command + " [key]",ERROR );
+        }
+        this->key = command[1];
+    }
+    
     return 1;
 
 }
 
- enum Generic::GenericCommands Type::_parseCommand(std::string command) {
+ enum Generic::GenericCommands Type::_parseCommand(std::string& command) {
 
     if(command == "size" ) return Generic::SIZE;
     if(command == "capacity") return Generic::CAPACITY;
     if(command == "keys") return Generic::KEYS;
     if(command == "table") return Generic::TABLE;
+    if(command == "get") return Generic::GET;
+    if(command == "del") return Generic::DEL;
     return Generic::UNKNOWN;
 
  }
@@ -46,7 +54,17 @@ int8_t Type::read(const uint8_t* start,const uint8_t* end, Response& res){
  std::string commandStr = this->command;
     try{
     switch(_parseCommand(command)){
-
+            
+        case Generic::GET: {
+                Value* val = Value::get(key);
+                res.output = val->toString();
+                break;
+            }
+             case Generic::DEL: {
+                Value::del(key);
+                res.output = "OK";
+                break;
+            }
         case Generic::KEYS: {
             std::deque<std::string> keys = storage->table->keys();
             if(keys.size() == 0) throw StorageException("No keys exist!",ERROR);
@@ -68,6 +86,11 @@ int8_t Type::read(const uint8_t* start,const uint8_t* end, Response& res){
         }
         case Generic::UNKNOWN:
         default:
+        if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
+                throw StorageException("Type mismatch: command '"+command+"' is not valid for generic commands",ERROR);
+            }
+            
+                throw StorageException("unknown command", ERROR);
         throw StorageException("unknown command", ERROR);
     }
     } catch (const StorageException& exp) {

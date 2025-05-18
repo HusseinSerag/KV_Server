@@ -4,10 +4,10 @@
 #include <fstream>
 
     template <typename T>
- void NumberValue<T>::init(std::true_type) { this->tag = 0x01; }  // For double
+ void NumberValue<T>::init(std::true_type) { this->type = DOUBLE; }  // For double
 
  template <typename T>
-    void NumberValue<T>::init(std::false_type) { this->tag = 0x00; } // For int64_t
+    void NumberValue<T>::init(std::false_type) { this->type = INT64; } // For int64_t
 template <typename T>
 NumberValue<T>::NumberValue(T val):value(val) {
     static_assert(
@@ -17,9 +17,13 @@ NumberValue<T>::NumberValue(T val):value(val) {
 
     // Call the appropriate overload
     init(std::is_same<T, double>{});
+    
 }
 
-
+template <typename T>
+enum ValueType NumberValue<T>::getType() {
+    return this->type;
+}
 template <typename T>
 void NumberValue<T>::increment(){
     this->value++;
@@ -53,7 +57,7 @@ std::string NumberValue<T>::toString() const {
 
 template <typename T>
 void NumberValue<T>::save(std::ostream& out){
-
+    int16_t tag = this->getType() == ValueType::DOUBLE ? 0x01 : 0x00;
     out.write(reinterpret_cast<char *>(&tag),sizeof(int16_t));
     size_t len = sizeof(T);
     out.write(reinterpret_cast<char *>(&len), sizeof(size_t));

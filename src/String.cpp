@@ -7,40 +7,35 @@
 #include "StringValue.h"
 #include "Logger.h"
 #include "ValueSet.h"
+#include "Number.h"
 
 
-int8_t String::read(const uint8_t* start, const uint8_t* end, Response& res) {
+int8_t String::read(std::vector<std::string> &request, Response& res) {
 
-    uint32_t len = 0;
-    if (!Helper::read_int<uint32_t>(start, end, len, 4)) return 0;
-
-    if (!Helper::read_str(start, end, len, command)) return 0;
-
-    uint32_t len_key = 0;
-    if (!Helper::read_int<uint32_t>(start, end, len_key, 4)) return 0;
-    if (!Helper::read_str(start, end, len_key, key)) return 0;
-    enum Str::StringCommand cmd = String::parseCommand(command);
-     if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT)){
-        if(end == start){
-            res.status = ERROR;
-            res.output = "Please supply a string for this operation!";
-            return -1;
-        }
-        uint32_t str_len = 0;
-        if(!Helper::read_int<uint32_t>(start,end,str_len, 4)) return 0;
-         if (!Helper::read_str(start, end, str_len, value)) return 0;
-     }
-    if (start != end) return 0; // trailing garbage
-
-    return 1;
+   if(request.size() < 2){
+        throw StorageException("atleast a command and key required!",ERROR );
+    }
+    if(request.size() > 3){
+        
+        throw StorageException("Invalid command!",ERROR );
+    
+    }
+   this->command = request[0];
+   this->key = request[1];
+   enum Str::StringCommand cmd = parseCommand(this->command);
+   if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT ) && request.size() == 2){
+      throw StorageException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
+   } 
+   if(cmd != Str::StringCommand::LENGTH)
+    this->value = request[2];
+   
+   return 1;
 }
 
 
-enum Str::StringCommand String::parseCommand(std::string command) {
+enum Str::StringCommand String::parseCommand(std::string& command) {
 
     if(command == "set"){ return Str::StringCommand::SET; }
-    if(command == "get"){ return Str::StringCommand::GET; }
-    if(command == "del") {return Str::StringCommand::DEL; }
     if(command == "concat") {return Str::StringCommand::CONCAT; }
     if(command == "len") {return Str::StringCommand::LENGTH; }
     else return Str::StringCommand::UNKNOWN;
@@ -57,20 +52,6 @@ void String::execute(Storage* storage, Response& res) {
                 res.output = "OK";
                 break;
             }
-
-            case Str::StringCommand::GET: {
-                Value* val = Value::get(key);
-                StringValue* str = dynamic_cast<StringValue*>(val);
-                if (!str) throw StorageException("incorrect type for get", ERROR);
-                res.output = str->toString();
-                break;
-            }
-             case Str::StringCommand::DEL: {
-                Value::del(key);
-                res.output = "OK";
-                break;
-            }
-
             case Str::StringCommand::LENGTH: {
                 Value* val = storage->table->get(key);
                 if (val == NULL) throw StorageException("not found", NOT_FOUND);
@@ -96,6 +77,11 @@ void String::execute(Storage* storage, Response& res) {
 
             }
             default:
+            // check if command is wrong type or not
+            if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN){
+                throw StorageException("Type mismatch: command '"+command+"' is not valid for string",ERROR);
+            }
+            
                 throw StorageException("unknown command", ERROR);
         }
 

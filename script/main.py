@@ -4,45 +4,67 @@ import socket
 import time
 import threading
 from command import parse_command, parse_resp, send_all
+import random
+import string
 
-HOST = "127.0.0.1"
-PORT = 3000
+# --- Random Generators ---
 
-def random_key():
-    return ''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
+def random_string(length=5):
+    return ''.join(random.choices(string.ascii_letters, k=length))
 
 def random_int():
     return str(random.randint(-10000, 10000))
 
 def random_double():
-    return str(round(random.uniform(-10000.0, 10000.0), 4))
+    while True:
+        val = round(random.uniform(-10000.0, 10000.0), 2)
+        if not (val != val or val == float('inf') or val == float('-inf')):  # Avoid NaN and inf
+            return str(val)
 
-def random_string():
-    return ''.join(random.choices(string.ascii_letters, k=random.randint(5, 12)))
+# --- Command Generator ---
 
-def generate_valid_command():
-    key = random_key()
+def generate_random_command():
+    key = random_string()
 
-    command_type = random.choice(["i", "d", "s", "generic", "mult"])
+    command_type = random.choice([
+        "set", "get",  "inc", "dec", "mult", "len", "concat", "keys", "unknown"
+    ])
 
-    if command_type == "i":
-        return ["i_set", key, random_int()]
-    elif command_type == "d":
-        return ["d_set", key, random_double()]
-    elif command_type == "s":
-        return ["s_set", key, random_string()]
-    elif command_type == "generic":
-        return [random.choice(["keys", "table", "capacity", "size"])]
+    if command_type == "set":
+        value_type = random.choice(["int", "double", "string"])
+        if value_type == "int":
+            value = random_int()
+        elif value_type == "double":
+            value = random_double()
+        else:
+            value = random_string()
+        return ["set", key, value]
+
+    elif command_type in ["get", "inc", "dec", "len"]:
+        return [command_type, key]
+
     elif command_type == "mult":
-        return [random.choice(["i_mult", "d_mult"]), key, random_int()]
+        return ["mult", key, random_int()]
+
+    elif command_type == "concat":
+        return ["concat", key, random_string()]
+
+    elif command_type == "keys":
+        return ["keys"]
+
+    elif command_type == "unknown":
+        value = random.choice([random_string(), random_int(), random_double()])
+        return [random_string(), key, value]
+
     else:
         return None
+HOST = "127.0.0.1"
+PORT = 3000
 
 def handle_command(command, results):
     msg = parse_command(command)
     if not msg:
         return
-
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((HOST, PORT))
@@ -59,7 +81,7 @@ def run_test(n=1000):
     start_time = time.time()
 
     for _ in range(n):
-        command = generate_valid_command()
+        command = generate_random_command()
         t = threading.Thread(target=handle_command, args=(command, results))
         threads.append(t)
         t.start()

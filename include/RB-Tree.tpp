@@ -1,6 +1,6 @@
 #include <iostream>
 #include "RB-Tree.h"
-enum Color {RED, BLACK};
+
 
 template <typename T>
 class RedBlackTree;
@@ -502,8 +502,8 @@ template <typename T>
    void RedBlackTree<T>::deleteTree(RBNode<T>* root) {
       // post order to delete
       if(root == NIL) return;
-      deleteTree<T>(root->left);
-      deleteTree<T>(root->right);
+      deleteTree(root->left);
+      deleteTree(root->right);
       delete root->val;
       delete root;
    }

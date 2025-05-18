@@ -4,12 +4,17 @@
 
 #include <fstream>
 
-StringValue::StringValue(std::string val):value(val) {}
-
+StringValue::StringValue(std::string val):value(val) {
+    this->type = STRING;
+}
+enum ValueType StringValue::getType() {
+    return this->type;
+}
 Value* StringValue::clone() const {
 
     return new StringValue(value);
 }
+
 
 int StringValue::length() {
 
@@ -27,7 +32,7 @@ std::string StringValue::toString() const {
 }
 
 void StringValue::save(std::ostream& out) {
-    uint16_t tag = 0x02;
+    int16_t tag = 0x02;
     out.write(reinterpret_cast<char*>(&tag),sizeof(tag));
     uint32_t len = (uint32_t)(value.size());
     out.write(reinterpret_cast<char *>(&len),sizeof(len));

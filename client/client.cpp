@@ -20,93 +20,19 @@ if(cmd.size() < 1) return -1;
     // several types
     // int64, doubles, strings, lists of ints doubles strings, .....
     // how do we know the type based on request if request starts with apropriate
-
-    // starts with i_ ints
-    // starts with d_ doubles
-    // starts with str_ strings
-    // starts with l lists
-    std::string& reqCmd = cmd.at(0);
-    if(reqCmd == "keys" || reqCmd == "size" || reqCmd == "capacity" || reqCmd ==
-    "table"){
-        uint32_t len = 2;
-        len += 4 + reqCmd.size();
+        uint32_t len = 4;
+        for(const std::string c: cmd){
+            len += 4 + c.size();
+        }
         if (len > k_max_msg) {
         return -1;
     }
     char wbuf[4 + k_max_msg];
-    int16_t in = 0x00;
+    int32_t nstr = cmd.size();
     memcpy(&wbuf[0], &len, 4);  // assume little endian
-    memcpy(&wbuf[4],&in,2);
+    memcpy(&wbuf[4],&nstr,4);
 
-    size_t cur = 6;
-    uint32_t p = (uint32_t)reqCmd.size();
-    memcpy(&wbuf[cur], &p, 4);
-    memcpy(&wbuf[cur + 4], reqCmd.data(), reqCmd.size());
-    cur += 4 + reqCmd.size();
-
-    return Helper::write_all(fd, wbuf, 4+len);
-
-
-    }
-    else if(reqCmd.rfind("i_", 0) == 0) {
-        // integer
-        reqCmd.erase(0,2);
-
-        uint32_t len = 2;
-     int64_t val = 0;
-    bool isNum = false;
-    if (!cmd.empty() && Helper::is_number(cmd.back())) {
-        val = std::stoll(cmd.back());
-        cmd.pop_back();
-        isNum = true;
-        len += 8; // reserve space for int64_t
-    }
-    for (const std::string &s : cmd) {
-        len += 4 + s.size();
-    }
-
-    if (len > k_max_msg) {
-        return -1;
-    }
-
-    char wbuf[4 + k_max_msg];
-    int16_t in = 0x02;
-    memcpy(&wbuf[0], &len, 4);  // assume little endian
-    memcpy(&wbuf[4],&in,2);
-   // uint32_t n = cmd.size();
-   // memcpy(&wbuf[6], &n, 4);
-    size_t cur = 6;
-    for (const std::string &s : cmd) {
-        uint32_t p = (uint32_t)s.size();
-        memcpy(&wbuf[cur], &p, 4);
-        memcpy(&wbuf[cur + 4], s.data(), s.size());
-        cur += 4 + s.size();
-    }
-     if (isNum) {
-        memcpy(&wbuf[cur], &val, 8);
-        cur += 8;
-    }
-    return Helper::write_all(fd, wbuf, 4+len);
-    }
-    else if(reqCmd.rfind("s_", 0) == 0) {
-        reqCmd.erase(0,2);
-
-        uint32_t len = 2;
-    for (const std::string &s : cmd) {
-        len += 4 + s.size();
-    }
-
-    if (len > k_max_msg) {
-        return -1;
-    }
-
-    char wbuf[4 + k_max_msg];
-    int16_t in = 0x03;
-    memcpy(&wbuf[0], &len, 4);  // assume little endian
-    memcpy(&wbuf[4],&in,2);
-   // uint32_t n = cmd.size();
-   // memcpy(&wbuf[6], &n, 4);
-    size_t cur = 6;
+    size_t cur = 8;
     for (const std::string &s : cmd) {
         uint32_t p = (uint32_t)s.size();
         memcpy(&wbuf[cur], &p, 4);
@@ -114,47 +40,6 @@ if(cmd.size() < 1) return -1;
         cur += 4 + s.size();
     }
     return Helper::write_all(fd, wbuf, 4+len);
-    }
-    else if(reqCmd.rfind("d_", 0) == 0) {
-       // double
-        reqCmd.erase(0,2);
-        uint32_t len = 2;
-     double val = 0;
-    bool isNum = false;
-    if (!cmd.empty() && Helper::is_number(cmd.back())) {
-        val = std::stod(cmd.back());
-        cmd.pop_back();
-        isNum = true;
-        len += sizeof(double); // reserve space for int64_t
-    }
-    for (const std::string &s : cmd) {
-        len += 4 + s.size();
-    }
-
-    if (len > k_max_msg) {
-        return -1;
-    }
-
-    char wbuf[4 + k_max_msg];
-    int16_t in = 0x01;
-    memcpy(&wbuf[0], &len, 4);  // assume little endian
-    memcpy(&wbuf[4],&in,2);
-   // uint32_t n = cmd.size();
-   // memcpy(&wbuf[6], &n, 4);
-    size_t cur = 6;
-    for (const std::string &s : cmd) {
-        uint32_t p = (uint32_t)s.size();
-        memcpy(&wbuf[cur], &p, 4);
-        memcpy(&wbuf[cur + 4], s.data(), s.size());
-        cur += 4 + s.size();
-    }
-     if (isNum) {
-        memcpy(&wbuf[cur], &val, sizeof(double));
-        cur += sizeof(double);
-    }
-    return Helper::write_all(fd, wbuf, 4+len);
-
-    }
 
     return -1;
 }
