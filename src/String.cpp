@@ -8,23 +8,24 @@
 #include "Logger.h"
 #include "ValueSet.h"
 #include "Number.h"
-
+#include "exception/WrongCommandException.h"
+#include "exception/NotFoundException.h"
 
 int8_t String::read(std::vector<std::string> &request, Response& res)  {
 
    if(request.size() < 2){
-        throw BaseException("atleast a command and key required!",ERROR );
+        throw WrongCommandException("atleast a command and key required!" );
     }
     if(request.size() > 3){
         
-        throw BaseException("Invalid command!",ERROR );
+        throw WrongCommandException("Invalid command!" );
     
     }
    this->command = request[0];
    this->key = request[1];
    enum Str::StringCommand cmd = parseCommand(this->command);
    if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT ) && request.size() == 2){
-      throw BaseException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
+      throw WrongCommandException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : "") );
    } 
    if(cmd != Str::StringCommand::LENGTH)
     this->value = request[2];
@@ -54,7 +55,7 @@ void String::execute(Storage* storage, Response& res) {
             }
             case Str::StringCommand::LENGTH: {
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw BaseException("not found", NOT_FOUND);
+                if (val == NULL) throw NotFoundException();
 
                 StringValue* str = dynamic_cast<StringValue*>(val);
                 if (!str) throw BaseException("incorrect type for increment", ERROR);
