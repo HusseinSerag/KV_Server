@@ -14,7 +14,7 @@ class String : public Type {
 public:
     int8_t read(std::vector<std::string> &request, Response& res) override;
     void execute(Storage* storage, Response& res) override;
-    static enum Str::StringCommand parseCommand(std::string& command);
+    static enum Str::StringCommand parseCommand(const std::string& command);
 
 };
 

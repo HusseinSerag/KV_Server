@@ -26,12 +26,14 @@ protected:
     std::string key;
     
     public:
-    static enum Generic::GenericCommands _parseCommand(std::string& command);
+    static enum Generic::GenericCommands _parseCommand(const std::string& command);
 
     virtual int8_t read(std::vector<std::string>& request, Response& res);
      static void write(std::vector<uint8_t>& output, Response& res);
+     static void isKeyValid(const std::string& key);
     virtual void execute(Storage* storage, Response& res);
     virtual ~Type();
+
     Type();
 
 

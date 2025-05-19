@@ -16,27 +16,27 @@ template <typename T>
 int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
       
     if(command.size() < 2){
-        throw WrongCommandException("atleast a command and key required!", );
+        throw WrongCommandException("atleast a command and key required!" );
     }
     if(command.size() > 3) {// error 
        // throw error
-        throw WrongCommandException("invalid command!", );
+        throw WrongCommandException("invalid command!" );
     }
     this->command = command[0];
     this->key = command[1];
     enum NumberCommand cmd = parseCommand(this->command);
     if(cmd == NumberCommand::DEC || cmd == NumberCommand::INC){
         if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
-             throw WrongCommandException("Value provided must be a number!", );
+             throw WrongCommandException("Value provided must be a number!");
         }
         this->value = command.size() == 3 ? std::stod(command[2]) : 1;
     }
      else if(command.size() < 3 && (cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE )){
-         throw WrongCommandException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""), );
+         throw WrongCommandException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""));
     } 
     if( cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE ){
         if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
-             throw WrongCommandException("Value provided must be a number!", );
+             throw WrongCommandException("Value provided must be a number!" );
         }
         this->value = std::stod(command[2]);
     }
@@ -46,7 +46,7 @@ int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
 }
 
 template <typename T>
-enum NumberCommand Number<T>::parseCommand(std::string& command) {
+enum NumberCommand Number<T>::parseCommand(const std::string& command) {
 
    if(command == "set") {return NumberCommand::SET;}
     if(command == "mult") { return NumberCommand::MULT; }

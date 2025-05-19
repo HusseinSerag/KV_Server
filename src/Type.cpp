@@ -26,19 +26,26 @@ void Type::write(std::vector<uint8_t>& out_buffer, Response& res) {
 
 int8_t Type::read(std::vector<std::string> & command, Response& res){
     this->command = command[0];
-    if(this-> command == "get" || this->command == "del"){
-        // TODO: IF COMMAND LESS THAN 2
+    enum Generic::GenericCommands cmd = _parseCommand(this->command);
+    if(cmd == Generic::GET || cmd == Generic::DEL){
+        
         if(command.size() != 2){
              throw BaseException("format is " + this->command + " [key]",ERROR );
         }
+        Type::isKeyValid(command[1]);
         this->key = command[1];
+    } else if(cmd != Generic::UNKNOWN) {
+        if(command.size() != 1){
+            throw WrongCommandException("format is '" + this->command +"' only!");
+        }
     }
+    
     
     return 1;
 
 }
 
- enum Generic::GenericCommands Type::_parseCommand(std::string& command) {
+ enum Generic::GenericCommands Type::_parseCommand(const std::string& command) {
 
     if(command == "size" ) return Generic::SIZE;
     if(command == "capacity") return Generic::CAPACITY;
@@ -103,3 +110,17 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
 
  }
 
+
+
+void Type::isKeyValid(const std::string& key){
+    // check if key not name of any command and doesn't start with number or any special character but _
+    
+    if(Type::_parseCommand(key) != Generic::UNKNOWN || Number<int>::parseCommand(key) != NumberCommand::UNKNOWN || String::parseCommand(key) != Str::StringCommand::UNKNOWN ){
+        throw BaseException("Cannot have key with name of a command!",ERROR);
+        
+    }
+    if(key[0] >= 'a' && key[0] <= 'z' || key[0] >= 'A' && key[0] <= 'Z' || key[0] == '_'){
+        return;
+    }
+    throw BaseException("key must start with an alphabetical letter or underscore!",ERROR);
+ }

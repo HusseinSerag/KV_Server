@@ -18,7 +18,7 @@ int8_t String::read(std::vector<std::string> &request, Response& res)  {
     }
     if(request.size() > 3){
         
-        throw WrongCommandException("Invalid command!" );
+        throw WrongCommandException("Invalid command!");
     
     }
    this->command = request[0];
@@ -27,14 +27,14 @@ int8_t String::read(std::vector<std::string> &request, Response& res)  {
    if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT ) && request.size() == 2){
       throw WrongCommandException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : "") );
    } 
-   if(cmd != Str::StringCommand::LENGTH)
+   if(cmd != Str::StringCommand::LENGTH && cmd != Str::StringCommand::UNKNOWN)
     this->value = request[2];
    
    return 1;
 }
 
 
-enum Str::StringCommand String::parseCommand(std::string& command) {
+enum Str::StringCommand String::parseCommand(const std::string& command) {
 
     if(command == "set"){ return Str::StringCommand::SET; }
     if(command == "concat") {return Str::StringCommand::CONCAT; }

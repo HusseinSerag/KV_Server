@@ -11,7 +11,6 @@ def parse_command(command):
     
     if not command:
         return
-
     totalLen = 4
     for req in command:
         totalLen += 4 + len(req)

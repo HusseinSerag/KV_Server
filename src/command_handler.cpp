@@ -87,10 +87,12 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         } else if(command == "set") {
             // do set command, only allowed in scalar not lists
             
+            
             if(cmd.size() < 3 || cmd.size() > 4){
                 throw BaseException("format is set [key] [value] ?[hint]!",ERROR );
             }
-            
+            // enforce that keys cannot be command names or start with numbers and only start with
+            Type::isKeyValid(cmd[1]);
             std::string hint = "", &value = cmd[2];
             // here there is a key and value and maybe a hint eys or no
             if(cmd.size() == 4){
@@ -129,14 +131,17 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         } else {
             Storage* storage = Storage::getInstance();
             if(cmd.size() < 2){
-                throw BaseException("Cannot have less than 2 commands for this operation", ERROR);
+                throw BaseException("Cannot have less than 2 strings for command", ERROR);
             }
+            
+            Type::isKeyValid(cmd[1]);
             Value* val = storage->table->get(cmd[1]);
             // based on this value create the correct type and pass type to do_response keep all checks in execute
               // start parsing based on command and key
             
             if(val == NULL)  {
                 type = new Type();
+                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN ) throw BaseException("Unknown command!",ERROR);
                 throw NotFoundException();
             };
             switch(val->getType()){
@@ -162,7 +167,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         
     }
     bool CommandHandler::handle_request(const uint8_t *request, size_t length, std::vector<uint8_t>& output){
-             std::vector<std::string> cmd;
+            std::vector<std::string> cmd;
             Response res;
             Type* type = nullptr;
             try{
