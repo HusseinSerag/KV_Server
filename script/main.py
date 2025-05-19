@@ -9,6 +9,8 @@ import string
 import multiprocessing
 import os
 import signal
+import datetime
+import logger
 
 # --- Random Generators ---
 
@@ -63,9 +65,11 @@ def generate_random_command():
         return None
 HOST = "127.0.0.1"
 PORT = random.randint(3000,4000)
-def run_server():
-    os.system(f"cd && cd KV_Server && ./start_script.sh {PORT}")
-def handle_command(command, results):
+def run_server(log_path):
+    os.system(f"cd && cd KV_Server && ./start_script.sh {PORT} > {log_path} 2>&1")
+
+
+def handle_command(command, results,cb):
     msg = parse_command(command)
     if not msg:
         return
@@ -74,22 +78,29 @@ def handle_command(command, results):
             s.connect((HOST, PORT))
             send_all(s, msg)
             
-            parse_resp(s)
+            parse_resp(s,cb)
             results["success"] += 1
     except Exception:
         results["fail"] += 1
 
 def run_test(n=1000):
-    process = multiprocessing.Process(target=run_server)
+    print("testing underway...")
+    base_dir = "tests"
+    os.makedirs(base_dir, exist_ok= True)
+
+    dir_name = os.path.join(base_dir,f"test_{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S%z')}")
+    os.makedirs(dir_name)
+    process = multiprocessing.Process(target=run_server,args=(os.path.join(dir_name,"server.output.log"),))
     process.start()
     time.sleep(5)
     threads = []
     results = {"success": 0, "fail": 0}
     start_time = time.time()
-
+    client_logger = logger.setup_logger("client_logger",os.path.join(dir_name,"client.output.log"))
+    
     for _ in range(n):
         command = generate_random_command()
-        t = threading.Thread(target=handle_command, args=(command, results))
+        t = threading.Thread(target=handle_command, name=f"Thread {_}", args=(command, results,lambda msg : client_logger.info("%s",msg.replace("%"," "))))
         threads.append(t)
         t.start()
 
@@ -97,12 +108,14 @@ def run_test(n=1000):
         t.join()
 
     duration = time.time() - start_time
-    print("\nLoad Test Complete")
-    print(f"Success: {results['success']}")
-    print(f"Failures: {results['fail']}")
-    print(f"Total Time: {duration:.2f}s")
-    print(f"Average Time per Command: {duration / n:.5f}s")
+    with open(os.path.join(dir_name, "results.txt"),"w") as f:
+        f.write("Load Test Complete\n")
+        f.write(f"Success: {results['success']}\n")
+        f.write(f"Failures: {results['fail']}\n")
+        f.write(f"Total Time: {duration:.2f}s\n")
+        f.write(f"Average Time per Command: {duration / n:.5f}s\n")
     os.kill(process.pid,signal.SIGTERM)
     process.join()
+    print("Test done, check results")
 if __name__ == "__main__":
     run_test(5000)

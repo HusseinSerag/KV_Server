@@ -31,7 +31,7 @@ def recv_all(socket, length):
             raise EOFError("socket closed")
         data += more
     return data
-def parse_resp(socket):
+def parse_resp(socket, cb):
    
     header = recv_all(socket, 4)
     (resp_len,) = struct.unpack("<I",header);
@@ -41,7 +41,7 @@ def parse_resp(socket):
 
     data = payload[4:]
 
-    print(f"Status: {status}- {data.decode()}")
+    cb(f"Status: {status}:{data.decode()}".replace("%"," "))
 
 
 def send_all(sock, data: bytes):
