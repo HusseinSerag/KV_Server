@@ -7,7 +7,7 @@
 #include "Value.h"
 #include "helpers.h"
 #include <deque>
-#include "exception.h"
+#include "exception/exception.h"
 #include "Logger.h"
 #include "Number.h"
 #include "String.h"
@@ -29,7 +29,7 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
     if(this-> command == "get" || this->command == "del"){
         // TODO: IF COMMAND LESS THAN 2
         if(command.size() != 2){
-             throw StorageException("format is " + this->command + " [key]",ERROR );
+             throw BaseException("format is " + this->command + " [key]",ERROR );
         }
         this->key = command[1];
     }
@@ -67,7 +67,7 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
             }
         case Generic::KEYS: {
             std::deque<std::string> keys = storage->table->keys();
-            if(keys.size() == 0) throw StorageException("No keys exist!",ERROR);
+            if(keys.size() == 0) throw BaseException("No keys exist!",ERROR);
 
             res.output = Helper::deque_to_string(keys);
             break;
@@ -87,13 +87,13 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
         case Generic::UNKNOWN:
         default:
         if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
-                throw StorageException("Type mismatch: command '"+command+"' is not valid for generic commands",ERROR);
+                throw BaseException("Type mismatch: command '"+command+"' is not valid for generic commands",ERROR);
             }
             
-                throw StorageException("unknown command", ERROR);
-        throw StorageException("unknown command", ERROR);
+                throw BaseException("unknown command", ERROR);
+        throw BaseException("unknown command", ERROR);
     }
-    } catch (const StorageException& exp) {
+    } catch (const BaseException& exp) {
         res.output = exp.what();
         res.status = exp.getResponse();
        

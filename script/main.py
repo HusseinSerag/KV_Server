@@ -6,6 +6,9 @@ import threading
 from command import parse_command, parse_resp, send_all
 import random
 import string
+import multiprocessing
+import os
+import signal
 
 # --- Random Generators ---
 
@@ -59,8 +62,9 @@ def generate_random_command():
     else:
         return None
 HOST = "127.0.0.1"
-PORT = 3000
-
+PORT = random.randint(3000,4000)
+def run_server():
+    os.system(f"cd && cd KV_Server && ./start_script.sh {PORT}")
 def handle_command(command, results):
     msg = parse_command(command)
     if not msg:
@@ -76,6 +80,9 @@ def handle_command(command, results):
         results["fail"] += 1
 
 def run_test(n=1000):
+    process = multiprocessing.Process(target=run_server)
+    process.start()
+    time.sleep(5)
     threads = []
     results = {"success": 0, "fail": 0}
     start_time = time.time()
@@ -95,6 +102,7 @@ def run_test(n=1000):
     print(f"Failures: {results['fail']}")
     print(f"Total Time: {duration:.2f}s")
     print(f"Average Time per Command: {duration / n:.5f}s")
-
+    os.kill(process.pid,signal.SIGTERM)
+    process.join()
 if __name__ == "__main__":
     run_test(5000)

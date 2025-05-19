@@ -3,38 +3,39 @@
 #include <iostream>
 #include <string>
 #include "helpers.h"
-#include "exception.h"
+#include "exception/exception.h"
 #include "ValueSet.h"
 #include "NumberValue.h"
 #include "Logger.h"
 #include "Type.h"
 #include "String.h"
+#include "exception/NotFoundException.h"
 
 template <typename T>
 int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
       
     if(command.size() < 2){
-        throw StorageException("atleast a command and key required!",ERROR );
+        throw BaseException("atleast a command and key required!",ERROR );
     }
     if(command.size() > 3) {// error
        // throw error
-        throw StorageException("invalid command!",ERROR );
+        throw BaseException("invalid command!",ERROR );
     }
     this->command = command[0];
     this->key = command[1];
     enum NumberCommand cmd = parseCommand(this->command);
     if(cmd == NumberCommand::DEC || cmd == NumberCommand::INC){
         if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
-             throw StorageException("Value provided must be a number!",ERROR );
+             throw BaseException("Value provided must be a number!",ERROR );
         }
         this->value = command.size() == 3 ? std::stod(command[2]) : 1;
     }
      else if(command.size() < 3 && (cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE )){
-         throw StorageException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
+         throw BaseException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
     } 
     if( cmd == NumberCommand::SET || cmd == NumberCommand::MULT || cmd == NumberCommand::DIVIDE ){
         if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
-             throw StorageException("Value provided must be a number!",ERROR );
+             throw BaseException("Value provided must be a number!",ERROR );
         }
         this->value = std::stod(command[2]);
     }
@@ -70,10 +71,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
             case NumberCommand::INC: {
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw NotFoundException();
 
                 NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
-                if (!u64Val) throw StorageException("incorrect type for increment", ERROR);
+                if (!u64Val) throw BaseException("incorrect type for increment", ERROR);
 
                 u64Val->increment();
                 res.output = "OK";
@@ -82,10 +83,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
 
             case NumberCommand::DEC: {
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw NotFoundException();
 
                 NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
-                if (!u64Val) throw StorageException("incorrect type for decrement", ERROR);
+                if (!u64Val) throw BaseException("incorrect type for decrement", ERROR);
 
                 u64Val->decrement();
                 res.output = "OK";
@@ -94,10 +95,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
 
             case NumberCommand::MULT: {
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw NotFoundException();
 
                 NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
-                if (!u64Val) throw StorageException("incorrect type for multiplication", ERROR);
+                if (!u64Val) throw BaseException("incorrect type for multiplication", ERROR);
 
                 u64Val->multiply(value);
                 res.output = "OK";
@@ -105,13 +106,13 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
 
             case NumberCommand::DIVIDE: {
-                if (value == 0) throw StorageException("division by zero", ERROR);
+                if (value == 0) throw BaseException("division by zero", ERROR);
 
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw NotFoundException();
 
                 NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
-                if (!u64Val) throw StorageException("incorrect type for division", ERROR);
+                if (!u64Val) throw BaseException("incorrect type for division", ERROR);
 
                 u64Val->divide(value);
                 res.output = "OK";
@@ -119,12 +120,12 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
             default:
             if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN){
-                 throw StorageException("Type mismatch: command '"+command+"' is not valid for number",ERROR);
+                 throw BaseException("Type mismatch: command '"+command+"' is not valid for number",ERROR);
             }
-                throw StorageException("unknown command", ERROR);
+                throw BaseException("unknown command", ERROR);
         }
 
-    } catch (const StorageException& exp) {
+    } catch (const BaseException& exp) {
         res.output = exp.what();
         res.status = exp.getResponse();
     }

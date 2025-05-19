@@ -3,28 +3,28 @@
 #include <iostream>
 #include <string>
 #include "helpers.h"
-#include "exception.h"
+#include "exception/exception.h"
 #include "StringValue.h"
 #include "Logger.h"
 #include "ValueSet.h"
 #include "Number.h"
 
 
-int8_t String::read(std::vector<std::string> &request, Response& res) {
+int8_t String::read(std::vector<std::string> &request, Response& res)  {
 
    if(request.size() < 2){
-        throw StorageException("atleast a command and key required!",ERROR );
+        throw BaseException("atleast a command and key required!",ERROR );
     }
     if(request.size() > 3){
         
-        throw StorageException("Invalid command!",ERROR );
+        throw BaseException("Invalid command!",ERROR );
     
     }
    this->command = request[0];
    this->key = request[1];
    enum Str::StringCommand cmd = parseCommand(this->command);
    if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT ) && request.size() == 2){
-      throw StorageException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
+      throw BaseException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : ""),ERROR );
    } 
    if(cmd != Str::StringCommand::LENGTH)
     this->value = request[2];
@@ -54,10 +54,10 @@ void String::execute(Storage* storage, Response& res) {
             }
             case Str::StringCommand::LENGTH: {
                 Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw BaseException("not found", NOT_FOUND);
 
                 StringValue* str = dynamic_cast<StringValue*>(val);
-                if (!str) throw StorageException("incorrect type for increment", ERROR);
+                if (!str) throw BaseException("incorrect type for increment", ERROR);
 
                 int len = str->length();
                 res.output = std::to_string(len);
@@ -66,10 +66,10 @@ void String::execute(Storage* storage, Response& res) {
 
             case Str::StringCommand::CONCAT: {
              Value* val = storage->table->get(key);
-                if (val == NULL) throw StorageException("not found", NOT_FOUND);
+                if (val == NULL) throw BaseException("not found", NOT_FOUND);
 
                 StringValue* str = dynamic_cast<StringValue*>(val);
-                if (!str) throw StorageException("incorrect type for increment", ERROR);
+                if (!str) throw BaseException("incorrect type for increment", ERROR);
 
                 str->concat(value);
                 res.output = str->toString();
@@ -79,13 +79,13 @@ void String::execute(Storage* storage, Response& res) {
             default:
             // check if command is wrong type or not
             if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN){
-                throw StorageException("Type mismatch: command '"+command+"' is not valid for string",ERROR);
+                throw BaseException("Type mismatch: command '"+command+"' is not valid for string",ERROR);
             }
             
-                throw StorageException("unknown command", ERROR);
+                throw BaseException("unknown command", ERROR);
         }
 
-    } catch (const StorageException& exp) {
+    } catch (const BaseException& exp) {
         res.output = exp.what();
         res.status = exp.getResponse();
     }

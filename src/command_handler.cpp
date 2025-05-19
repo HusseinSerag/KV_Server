@@ -11,8 +11,9 @@
 #include "Response.h"
 #include "helpers.h"
 #include "String.h"
-#include "exception.h"
-
+#include "exception/exception.h"
+#include "exception/NotFoundException.h"
+#include "exception/MalformedMessage.h"
 
 
 
@@ -44,7 +45,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             uint32_t nstr = 0;
             
             if(!Helper::read_int<uint32_t>(request,end,nstr,4)){
-              throw  -1; // replace with malformed message exception
+              throw  MalformedMessageException(); // replace with malformed message exception
             }
             
             // read entire request sent
@@ -53,24 +54,22 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 // read 4 bytes length, then n bytes length of message
                 uint32_t len = 0;
                 if(!Helper::read_int<uint32_t>(request,end,len,4)){
-                   throw -1;
+                   throw MalformedMessageException();
                 }
                
             std::string text;
             if(!Helper::read_str(request,end,len, text)){
-               throw -1;
+               throw MalformedMessageException();
             }
             cmd.push_back(text);
          }
         
-         if (request != end) throw -1; // trailing garbage
+         if (request != end) throw MalformedMessageException(); // trailing garbage
          
        
         return 0;
     
     }
-
-
     void CommandHandler::parse_request(std::vector<std::string>& cmd, Response& res, Type* & type) {
     
        
@@ -79,7 +78,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         // normal set and del and get 
         
         if(cmd.size() < 1){
-            throw StorageException("Cannot have an empty command!", ERROR);
+            throw BaseException("Cannot have an empty command!", ERROR);
         }
         std::string& command = cmd[0];
         if(Type::_parseCommand(command) != Generic::UNKNOWN){
@@ -89,7 +88,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             // do set command, only allowed in scalar not lists
             
             if(cmd.size() < 3 || cmd.size() > 4){
-                throw StorageException("format is set [key] [value] ?[hint]!",ERROR );
+                throw BaseException("format is set [key] [value] ?[hint]!",ERROR );
             }
             
             std::string hint = "", &value = cmd[2];
@@ -110,11 +109,11 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             } else {
                 // check for type based on hint
                 if(hint != "int" && hint != "double" && hint != "string"){
-                    throw StorageException("hint is only string, int, or double!",ERROR );
+                    throw BaseException("hint is only string, int, or double!",ERROR );
                     
                 }
                 if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
-                    throw StorageException("type mismatch! Couldn't convert to a number type",ERROR );
+                    throw BaseException("type mismatch! Couldn't convert to a number type",ERROR );
                 }
 
                  if(hint == "int"){
@@ -130,7 +129,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         } else {
             Storage* storage = Storage::getInstance();
             if(cmd.size() < 2){
-                throw StorageException("Cannot have less than 2 commands for this operation", ERROR);
+                throw BaseException("Cannot have less than 2 commands for this operation", ERROR);
             }
             Value* val = storage->table->get(cmd[1]);
             // based on this value create the correct type and pass type to do_response keep all checks in execute
@@ -138,7 +137,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             
             if(val == NULL)  {
                 type = new Type();
-                throw StorageException("key not found",NOT_FOUND);
+                throw NotFoundException();
             };
             switch(val->getType()){
                 case ValueType::DOUBLE:
@@ -154,7 +153,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 default:
                     // unsupported type
                     
-                     throw StorageException("Unsupported type!",ERROR );
+                     throw BaseException("Unsupported type!",ERROR );
                     break;
                 
             }
@@ -171,13 +170,8 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 CommandHandler::read_request(request, length, cmd, res);
                 CommandHandler::parse_request(cmd, res, type);
 
-            } catch(int n) {
-                res.output = "malformed message";
-                res.status = ERROR;
-                CommandHandler::do_response(type, res, output);
-                
-            }
-            catch(const StorageException& e){
+            } 
+            catch(const BaseException& e){
                 res.output = e.what();
                 res.status = e.getResponse();
                 

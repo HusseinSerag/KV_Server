@@ -10,7 +10,7 @@ add_executable(client_exec
     shared/helpers.cpp
 )
 
-file(GLOB SERVER_SRC "src/*.cpp" "shared/*.cpp")
+file(GLOB SERVER_SRC "src/*.cpp" "shared/*.cpp" "shared/exception/*.cpp")
 
 add_executable(server_exec ${SERVER_SRC}
 )
