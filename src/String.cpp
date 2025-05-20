@@ -54,10 +54,10 @@ void String::execute(Storage* storage, Response& res) {
                 break;
             }
             case Str::StringCommand::LENGTH: {
-                Value* val = storage->table->get(key);
+                Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                StringValue* str = dynamic_cast<StringValue*>(val);
+                StringValue* str = dynamic_cast<StringValue*>(*val);
                 if (!str) throw BaseException("incorrect type for increment", ERROR);
 
                 int len = str->length();
@@ -66,10 +66,10 @@ void String::execute(Storage* storage, Response& res) {
             }
 
             case Str::StringCommand::CONCAT: {
-             Value* val = storage->table->get(key);
+             Value** val = storage->table->get(key);
                 if (val == NULL) throw BaseException("not found", NOT_FOUND);
 
-                StringValue* str = dynamic_cast<StringValue*>(val);
+                StringValue* str = dynamic_cast<StringValue*>(*val);
                 if (!str) throw BaseException("incorrect type for increment", ERROR);
 
                 str->concat(value);

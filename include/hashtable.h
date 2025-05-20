@@ -17,7 +17,7 @@ public:
     ~Hashtable();
 
     void set(K key, V val);
-    V get(K key);
+    V* get(K key);
     int remove(K key);
     std::deque<K> keys();
     unsigned int getSize();
@@ -25,6 +25,7 @@ public:
     std::string table_toString();
     SinglyLinkedList<K, V>* getArr();
     void unsafe_set(K key, V val);
+   
 
 };
 

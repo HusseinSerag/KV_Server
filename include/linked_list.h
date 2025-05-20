@@ -14,7 +14,7 @@ class Node {
     public:
         Node(K key, V val, Node* next);
 
-        V getValue();
+        V& getValue();
         K getKey();
         Node* getNext();
         void setValue(V val);

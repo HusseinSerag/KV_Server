@@ -29,8 +29,15 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
 
  void CommandHandler::do_response(Type* type, Response &res, std::vector<uint8_t>& output) {
     Storage* storage = Storage::getInstance();
-    if(res.status == OK)
-    type->execute(storage, res);
+    bool hasExecuted = false;
+    if(res.status == OK){
+        hasExecuted = true;
+        type->execute(storage, res);
+    }
+    if(!hasExecuted){
+        std::string logMessage = Helper::getCurrentTimestamp() +" | Status: " + (res.status == OK ? "Success" : "Error") + (res.status != OK ? " | Reason: " + res.output : "");
+    Logger::log(logMessage);
+    }
 
     if(res.status == OK) storage->write();
     Type::write(output, res);
@@ -135,7 +142,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             }
             
             Type::isKeyValid(cmd[1]);
-            Value* val = storage->table->get(cmd[1]);
+            Value** val = storage->table->get(cmd[1]);
             // based on this value create the correct type and pass type to do_response keep all checks in execute
               // start parsing based on command and key
             
@@ -144,7 +151,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN ) throw BaseException("Unknown command!",ERROR);
                 throw NotFoundException();
             };
-            switch(val->getType()){
+            switch((*val)->getType()){
                 case ValueType::DOUBLE:
                     type = new Number<double>();
                     break;

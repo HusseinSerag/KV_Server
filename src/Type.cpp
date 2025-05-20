@@ -124,3 +124,8 @@ void Type::isKeyValid(const std::string& key){
     }
     throw BaseException("key must start with an alphabetical letter or underscore!",ERROR);
  }
+
+
+ std::string& Type::getCommand(){
+    return this->command;
+ }

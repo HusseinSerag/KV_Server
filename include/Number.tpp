@@ -71,10 +71,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 break;
             }
             case NumberCommand::INC: {
-                Value* val = storage->table->get(key);
+                Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
+                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
                 if (!u64Val) throw BaseException("incorrect type for increment", ERROR);
 
                 u64Val->increment();
@@ -83,10 +83,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
 
             case NumberCommand::DEC: {
-                Value* val = storage->table->get(key);
+                Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
+                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
                 if (!u64Val) throw BaseException("incorrect type for decrement", ERROR);
 
                 u64Val->decrement();
@@ -95,10 +95,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
 
             case NumberCommand::MULT: {
-                Value* val = storage->table->get(key);
+                Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
+                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
                 if (!u64Val) throw BaseException("incorrect type for multiplication", ERROR);
 
                 u64Val->multiply(value);
@@ -109,10 +109,10 @@ void Number<T>::execute(Storage* storage, Response& res) {
             case NumberCommand::DIVIDE: {
                 if (value == 0) throw BaseException("division by zero", ERROR);
 
-                Value* val = storage->table->get(key);
+                Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(val);
+                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
                 if (!u64Val) throw BaseException("incorrect type for division", ERROR);
 
                 u64Val->divide(value);

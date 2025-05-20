@@ -6,22 +6,22 @@
 #include <iostream>
 
 Config* Config::instance = nullptr;
-Config::Config() {
+Config::Config():config(Hashtable<std::string, std::string>(8)) {
 
-    config = std::map<std::string,std::string>();
+
 
 }
 
     void Config::default_values() {
-        if(config.find("port") == config.end()) {
-            config["port"] = "3000";
-        } if(config.find("log_file") == config.end()){
-        config["log_file"] = "logs/operations.log";
-        } if(config.find("data_file") == config.end()){
-        config["data_file"] = "data/storage.dat";
+        if(config.get("port") == NULL) {
+            config.set("port", "3000");
+        } if(config.get("log_file") == NULL){
+        config.set("log_file", "logs/operations.log");
+        } if(config.get("data_file") == NULL){
+        config.set("data_file", "data/storage.dat");
         }
-        if(config.find("persistence") == config.end()){
-            config["persistence"] = "1";
+        if(config.get("persistence") == NULL){
+            config.set("persistence",  "1");
         }
     }
     bool Config::rules(std::string& key,std::string& value) {
@@ -76,7 +76,7 @@ Config::Config() {
             if(!rules(cand_key,cand_value)){
             return false;
             }
-            config[cand_key] = cand_value;
+            config.set(cand_key, cand_value);
             }
 
 
@@ -87,8 +87,9 @@ Config::Config() {
     }
 
     std::string Config::get(const std::string& key){
-        if(config.find(key) != config.end()) {
-            return config[key];
+        std::string* res = config.get(key);
+        if(res != NULL) {
+            return *res;
         }
         return "";
     }
@@ -111,3 +112,5 @@ Config::Config() {
     std::string Config::getErrors() {
         return errors;
     }
+
+   

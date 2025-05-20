@@ -33,6 +33,7 @@ protected:
      static void isKeyValid(const std::string& key);
     virtual void execute(Storage* storage, Response& res);
     virtual ~Type();
+    std::string& getCommand();
 
     Type();
 

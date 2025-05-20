@@ -7,7 +7,7 @@ Node<K,V>::Node(K key, V val, Node* next) : next(next), key(key), val(val) {}
 
 
 template <typename K, typename V>
-V Node<K,V>::getValue() { return val; }
+V& Node<K,V>::getValue() { return val; }
 
 
 template <typename K, typename V>

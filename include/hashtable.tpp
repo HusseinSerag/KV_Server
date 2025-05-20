@@ -22,7 +22,9 @@ Hashtable<K, V>::~Hashtable() {
     Node<K, V>* current = list.getHead();
     while (current) {
         Node<K, V>* next = current->getNext();
-        delete current->getValue();             
+        if constexpr (std::is_pointer_v<V>) {
+            delete current->getValue();
+        }           
         current = next;
     }
 }
@@ -61,7 +63,10 @@ void Hashtable<K, V>::set(K key, V val) {
     Node<K, V>* node = l.search(key);
 
     if (node != NULL) {
-        delete node->getValue();
+        if constexpr (std::is_pointer_v<V>) {
+            delete node->getValue();
+        }
+        
         node->setValue(val);
     } else {
         l.appendToFront(key, val);
@@ -73,13 +78,13 @@ void Hashtable<K, V>::set(K key, V val) {
 }
 
 template <typename K, typename V>
-V Hashtable<K, V>::get(K key) {
+V* Hashtable<K, V>::get(K key) {
     int ind =  Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
     SinglyLinkedList<K, V>& l = arr[ind];
     Node<K, V>* node = l.search(key);
 
     if (node != NULL) {
-        return node->getValue();
+        return &(node->getValue());
     }
     return NULL;
 }
@@ -124,7 +129,13 @@ std::string Hashtable<K,V>::table_toString() {
     for(int i = 0; i < this->capacity; i++){
         SinglyLinkedList<K,V>& l = arr[i];
             for(Node<K,V>* p = l.getHead(); p != NULL; p = p->getNext()){
-                out += "[" + p->getKey() + "]:" + p->getValue()->toString() + "\n";
+                std::string msg;
+                if constexpr (std::is_pointer_v<V>) {
+                    msg = p->getValue()->toString();
+                } else {
+                    std::to_string(p->getValue());
+                }
+                out += "[" + p->getKey() + "]:" + msg + "\n";
             }
     }
     return out;
@@ -135,3 +146,4 @@ template<typename K, typename V>
 SinglyLinkedList<K, V>* Hashtable<K,V>::getArr() {
     return arr;
 }
+
