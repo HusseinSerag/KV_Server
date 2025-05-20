@@ -65,8 +65,7 @@ void Hashtable<K, V>::set(K key, V val) {
     if (node != NULL) {
         if constexpr (std::is_pointer_v<V>) {
             delete node->getValue();
-        }
-        
+        } 
         node->setValue(val);
     } else {
         l.appendToFront(key, val);
@@ -82,7 +81,6 @@ V* Hashtable<K, V>::get(K key) {
     int ind =  Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
     SinglyLinkedList<K, V>& l = arr[ind];
     Node<K, V>* node = l.search(key);
-
     if (node != NULL) {
         return &(node->getValue());
     }

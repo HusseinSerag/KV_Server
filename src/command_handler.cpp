@@ -85,7 +85,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         // normal set and del and get 
         
         if(cmd.size() < 1){
-            throw BaseException("Cannot have an empty command!", ERROR);
+            throw WrongCommandException("Cannot have an empty command!");
         }
         std::string& command = cmd[0];
         if(Type::_parseCommand(command) != Generic::UNKNOWN){
@@ -96,7 +96,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             
             
             if(cmd.size() < 3 || cmd.size() > 4){
-                throw BaseException("format is set [key] [value] ?[hint]!",ERROR );
+                throw WrongCommandException("format is set [key] [value] ?[hint]!");
             }
             // enforce that keys cannot be command names or start with numbers and only start with
             Type::isKeyValid(cmd[1]);
@@ -118,11 +118,11 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             } else {
                 // check for type based on hint
                 if(hint != "int" && hint != "double" && hint != "string"){
-                    throw BaseException("hint is only string, int, or double!",ERROR );
+                    throw WrongCommandException("hint is only string, int, or double!");
                     
                 }
                 if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
-                    throw BaseException("type mismatch! Couldn't convert to a number type",ERROR );
+                    throw WrongCommandException("type mismatch! Couldn't convert to a number type");
                 }
 
                  if(hint == "int"){
@@ -138,7 +138,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         } else {
             Storage* storage = Storage::getInstance();
             if(cmd.size() < 2){
-                throw BaseException("Cannot have less than 2 strings for command", ERROR);
+                throw WrongCommandException("Cannot have less than 2 strings for command");
             }
             
             Type::isKeyValid(cmd[1]);
@@ -148,7 +148,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             
             if(val == NULL)  {
                 type = new Type();
-                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN ) throw BaseException("Unknown command!",ERROR);
+                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN ) throw WrongCommandException("Unknown command!");
                 throw NotFoundException();
             };
             switch((*val)->getType()){
@@ -165,7 +165,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 default:
                     // unsupported type
                     
-                     throw BaseException("Unsupported type!",ERROR );
+                     throw WrongCommandException("Unsupported type!");
                     break;
                 
             }

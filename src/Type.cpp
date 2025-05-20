@@ -11,6 +11,8 @@
 #include "Logger.h"
 #include "Number.h"
 #include "String.h"
+#include "exception/TypeMismatchException.h"
+#include "exception/WrongCommandException.h"
 
 
 Type::~Type() {}
@@ -30,7 +32,7 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
     if(cmd == Generic::GET || cmd == Generic::DEL){
         
         if(command.size() != 2){
-             throw BaseException("format is " + this->command + " [key]",ERROR );
+             throw WrongCommandException("format is " + this->command + " [key]" );
         }
         Type::isKeyValid(command[1]);
         this->key = command[1];
@@ -94,11 +96,9 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
         case Generic::UNKNOWN:
         default:
         if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
-                throw BaseException("Type mismatch: command '"+command+"' is not valid for generic commands",ERROR);
+                throw TypeMismatchException(command);
             }
-            
-                throw BaseException("unknown command", ERROR);
-        throw BaseException("unknown command", ERROR);
+        throw WrongCommandException("unknown command");
     }
     } catch (const BaseException& exp) {
         res.output = exp.what();
@@ -116,13 +116,13 @@ void Type::isKeyValid(const std::string& key){
     // check if key not name of any command and doesn't start with number or any special character but _
     
     if(Type::_parseCommand(key) != Generic::UNKNOWN || Number<int>::parseCommand(key) != NumberCommand::UNKNOWN || String::parseCommand(key) != Str::StringCommand::UNKNOWN ){
-        throw BaseException("Cannot have key with name of a command!",ERROR);
+        throw WrongCommandException("Cannot have key with name of a command!");
         
     }
     if(key[0] >= 'a' && key[0] <= 'z' || key[0] >= 'A' && key[0] <= 'Z' || key[0] == '_'){
         return;
     }
-    throw BaseException("key must start with an alphabetical letter or underscore!",ERROR);
+    throw WrongCommandException("key must start with an alphabetical letter or underscore!");
  }
 
 

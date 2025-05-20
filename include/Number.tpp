@@ -11,6 +11,7 @@
 #include "String.h"
 #include "exception/NotFoundException.h"
 #include "exception/WrongCommandException.h"
+#include "exception/TypeMismatchException.h"
 
 template <typename T>
 int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
@@ -121,9 +122,9 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
             default:
             if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN){
-                 throw BaseException("Type mismatch: command '"+command+"' is not valid for number",ERROR);
+                 throw TypeMismatchException(command);
             }
-                throw BaseException("unknown command", ERROR);
+                throw WrongCommandException("unknown command");
         }
 
     } catch (const BaseException& exp) {

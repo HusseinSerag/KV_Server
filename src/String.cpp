@@ -10,6 +10,7 @@
 #include "Number.h"
 #include "exception/WrongCommandException.h"
 #include "exception/NotFoundException.h"
+#include "exception/TypeMismatchException.h"
 
 int8_t String::read(std::vector<std::string> &request, Response& res)  {
 
@@ -80,10 +81,10 @@ void String::execute(Storage* storage, Response& res) {
             default:
             // check if command is wrong type or not
             if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN){
-                throw BaseException("Type mismatch: command '"+command+"' is not valid for string",ERROR);
+                throw TypeMismatchException(command);
             }
             
-                throw BaseException("unknown command", ERROR);
+                throw WrongCommandException("unknown command");
         }
 
     } catch (const BaseException& exp) {
