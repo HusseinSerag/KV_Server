@@ -21,7 +21,7 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
         config.set("data_file", "data/storage.dat");
         }
         if(config.get("persistence") == NULL){
-            config.set("persistence",  "1");
+            config.set("persistence",  "0");
         }
     }
     bool Config::rules(std::string& key,std::string& value) {

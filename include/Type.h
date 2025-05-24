@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
+#include "Value.h"
 // commands keys values size capacity all
 
 namespace Generic {
@@ -34,6 +35,8 @@ protected:
     virtual void execute(Storage* storage, Response& res);
     virtual ~Type();
     std::string& getCommand();
+    static void parse_set(std::vector<std::string>& cmd, NumberKind& t);
+    
 
     Type();
 

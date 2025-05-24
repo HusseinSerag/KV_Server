@@ -23,6 +23,8 @@ class Helper {
      static int32_t read_full(int fd, char *buf, size_t n);
      static int32_t write_all(int fd, const char *buf, size_t n);
      static bool is_number(const std::string& s);
+     template <class T>
+     static T convert(const std::string& str);
 
 };
 

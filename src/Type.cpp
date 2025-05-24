@@ -129,3 +129,39 @@ void Type::isKeyValid(const std::string& key){
  std::string& Type::getCommand(){
     return this->command;
  }
+
+
+ void Type::parse_set(std::vector<std::string>& cmd, NumberKind& t) {
+       // do set command, only allowed in scalar not lists
+            if(cmd.size() < 3 || cmd.size() > 4){
+                throw WrongCommandException("format is set [key] [value] ?[hint]!");
+            }
+            // enforce that keys cannot be command names or start with numbers and only start with
+            Type::isKeyValid(cmd[1]);
+            std::string hint = "", &value = cmd[2];
+            // here there is a key and value and maybe a hint yes or no
+            if(cmd.size() == 4){
+                hint = cmd[3];
+            }
+             t = Helper::isNumber(value);
+            if(!(hint == "")){
+                // try parsing and create correct type
+                // check for type based on hint
+                if(hint != "int" && hint != "double" && hint != "string"){
+                    throw WrongCommandException("hint is only string, int, or double!");
+                    
+                }
+                if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
+                    throw WrongCommandException("type mismatch! Couldn't convert to a number type");
+                }
+
+                 if(hint == "int"){
+                    t = NumberKind::INTEGER;
+                } else if(hint == "double"){
+                    t = NumberKind::DOUBLE;
+                } else {
+                    t = NumberKind::NOT_NUMBER;
+                }
+                cmd.erase(cmd.begin() + 3);
+            }
+ }

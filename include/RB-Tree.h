@@ -58,7 +58,8 @@ class RedBlackTree {
     void removeByIndex(int ind);
     RBNode<T> *  minimum(RBNode<T> * root);
     RBNode<T> *  maximum(RBNode<T> * root);
-    void inorder(RBNode<T> * root, void (*cb)(T val));
+    std::string toString() const;
+    void inorder(RBNode<T> * root,std::string& out) const;
     RBNode<T> * search(T val);
    RBNode<T>*  rank(int val);
    void print(RBNode<T>* root, std::string indent, bool last);

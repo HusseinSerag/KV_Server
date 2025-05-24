@@ -3,6 +3,7 @@
  #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include "helpers.h"
 
 
 
@@ -18,3 +19,16 @@
 }
 
 
+
+template<>
+ inline double Helper::convert(const std::string& str){
+    return std::stod(str);
+}
+template<>
+ inline int64_t Helper::convert(const std::string& str){
+    return std::stoll(str);
+}
+template<>
+ inline std::string Helper::convert(const std::string& str){
+    return str;
+}

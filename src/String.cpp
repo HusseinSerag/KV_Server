@@ -12,6 +12,10 @@
 #include "exception/NotFoundException.h"
 #include "exception/TypeMismatchException.h"
 
+String::String(){}
+String::String(const std::string& val){
+    this->value = val;
+}
 int8_t String::read(std::vector<std::string> &request, Response& res)  {
 
    if(request.size() < 2){
@@ -46,7 +50,7 @@ enum Str::StringCommand String::parseCommand(const std::string& command) {
 
 
 void String::execute(Storage* storage, Response& res) {
- std::string commandStr = this->command;
+ std::string& commandStr = this->command;
     try {
         switch(parseCommand(command)) {
             case Str::StringCommand::SET: {
@@ -80,7 +84,7 @@ void String::execute(Storage* storage, Response& res) {
             }
             default:
             // check if command is wrong type or not
-            if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN){
+            if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN || List::parseCommand(command) != ListC::UNKNOWN){
                 throw TypeMismatchException(command);
             }
             
@@ -97,5 +101,17 @@ void String::execute(Storage* storage, Response& res) {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const String& str) {
+    os << "value:" << str.value << std::endl;
+    return os;
+}
 
 
+
+Value* String::toValue() {
+    return new StringValue(this->value);
+}
+
+std::string String::getValue() {
+    return value;
+}

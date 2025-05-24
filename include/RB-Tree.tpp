@@ -426,15 +426,27 @@ template <typename T>
          temp = temp->right;
       }
       return temp;
-      }template <typename T>
-        void RedBlackTree<T>::inorder(RBNode<T> * root, void (*cb)(T val)){
+
+   }
+   template <typename T>
+       std::string  RedBlackTree<T>::toString() const {
+         std::string output;
+         output += "[";
+         inorder(root,output);
+         output.pop_back();
+         output += "]";
+         return output;
+       }
+      template <typename T>
+        void RedBlackTree<T>::inorder( RBNode<T> * root, std::string& s) const{
       if(root == NIL){
          return;
       }
-      inorder(root->left, cb);
+      inorder(root->left,s);
       //  cb(root->val);
-      std::cout << "size: "<< root->size << " , " << root->val << std::endl;
-      inorder(root->right,cb);
+      std::string v = *(root->getVal());
+       s+= " " + v + "," ;
+      inorder(root->right,s);
    }
 template <typename T>
    RBNode<T> * RedBlackTree<T>::getRoot() {

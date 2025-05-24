@@ -1,7 +1,6 @@
 
 #include "StringValue.h"
 #include <string>
-
 #include <fstream>
 
 StringValue::StringValue(std::string val):value(val) {
@@ -49,3 +48,4 @@ void StringValue::load(std::istream& in){
 
 
 }
+

@@ -14,6 +14,8 @@
 #include "exception/exception.h"
 #include "exception/NotFoundException.h"
 #include "exception/MalformedMessage.h"
+#include "List.h"
+#include "StringList.h"
 
 
 
@@ -84,63 +86,50 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
         // start parsing based on command and key
         // normal set and del and get 
         
-        if(cmd.size() < 1){
+        if(cmd.empty()){
             throw WrongCommandException("Cannot have an empty command!");
         }
         std::string& command = cmd[0];
-        if(Type::_parseCommand(command) != Generic::UNKNOWN){
+        if(Type::_parseCommand(command) != Generic::UNKNOWN) {
             // generic command
             type = new Type();
-        } else if(command == "set") {
-            // do set command, only allowed in scalar not lists
-            
-            
-            if(cmd.size() < 3 || cmd.size() > 4){
-                throw WrongCommandException("format is set [key] [value] ?[hint]!");
-            }
-            // enforce that keys cannot be command names or start with numbers and only start with
-            Type::isKeyValid(cmd[1]);
-            std::string hint = "", &value = cmd[2];
-            // here there is a key and value and maybe a hint eys or no
-            if(cmd.size() == 4){
-                hint = cmd[3];
-            }
-            NumberKind t = Helper::isNumber(value);
-            if(hint == ""){
-                // try parsing and create correct type
-                if(t == NumberKind::INTEGER){
-                    type = new Number<int64_t>();
-                } else if(t == NumberKind::DOUBLE){
-                    type = new Number<double>();
-                } else {
-                    type = new String();
+        } else if(command == "set" || command == "ladd") {
+            // setter commands treated differently
+            NumberKind t;
+            if(command == "set"){
+                Type::parse_set(cmd,t);
+                switch(t) {
+                    case NumberKind::INTEGER:
+                        type = new Number<int64_t>();
+                        break;
+                    case NumberKind::DOUBLE:
+                        type = new Number<double>();
+                        break;
+                    case NumberKind::NOT_NUMBER:
+                        type = new String();
+                        break;
+
                 }
             } else {
-                // check for type based on hint
-                if(hint != "int" && hint != "double" && hint != "string"){
-                    throw WrongCommandException("hint is only string, int, or double!");
-                    
+                List::parse_add(cmd,t);
+                switch(t) {
+                    case NumberKind::INTEGER:
+                        type = new Type();
+                        break;
+                    case NumberKind::DOUBLE:
+                        type = new Type();
+                        break;
+                    case NumberKind::NOT_NUMBER:
+                        type = new StringList();
+                        break;
                 }
-                if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
-                    throw WrongCommandException("type mismatch! Couldn't convert to a number type");
-                }
-
-                 if(hint == "int"){
-                    type = new Number<int64_t>();
-                } else if(hint == "double"){
-                    type = new Number<double>();
-                } else {
-                    type = new String();
-                }
-                cmd.erase(cmd.begin() + 3);
-
             }
+         
         } else {
             Storage* storage = Storage::getInstance();
             if(cmd.size() < 2){
                 throw WrongCommandException("Cannot have less than 2 strings for command");
             }
-            
             Type::isKeyValid(cmd[1]);
             Value** val = storage->table->get(cmd[1]);
             // based on this value create the correct type and pass type to do_response keep all checks in execute
@@ -148,29 +137,29 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             
             if(val == NULL)  {
                 type = new Type();
-                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN ) throw WrongCommandException("Unknown command!");
+                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN || List::parseCommand(cmd[0]) == ListC::UNKNOWN) throw WrongCommandException("Unknown command!");
                 throw NotFoundException();
             };
             switch((*val)->getType()){
                 case ValueType::DOUBLE:
                     type = new Number<double>();
                     break;
-
                 case ValueType::INT64: // ints
                     type = new Number<int64_t>();
                     break;
                 case ValueType::STRING:
                     type = new String();
                     break;
+                case ValueType::LIST_STRING:
+                    type = new StringList();
+                    break;
                 default:
                     // unsupported type
-                    
                      throw WrongCommandException("Unsupported type!");
                     break;
                 
             }
         }
-        type->read(cmd,res);
         
     }
     bool CommandHandler::handle_request(const uint8_t *request, size_t length, std::vector<uint8_t>& output){
@@ -181,6 +170,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 
                 CommandHandler::read_request(request, length, cmd, res);
                 CommandHandler::parse_request(cmd, res, type);
+                type->read(cmd,res);
 
             } 
             catch(const BaseException& e){

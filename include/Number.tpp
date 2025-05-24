@@ -12,7 +12,14 @@
 #include "exception/NotFoundException.h"
 #include "exception/WrongCommandException.h"
 #include "exception/TypeMismatchException.h"
+#include "List.h"
 
+template <typename T>
+Number<T>::Number(){}
+template <typename T>
+Number<T>::Number(const std::string& val){
+    this->value = std::stod(val);
+}
 template <typename T>
 int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
       
@@ -121,7 +128,7 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 break;
             }
             default:
-            if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN){
+            if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN || List::parseCommand(command) != ListC::UNKNOWN)  {
                  throw TypeMismatchException(command);
             }
                 throw WrongCommandException("unknown command");
@@ -136,5 +143,17 @@ void Number<T>::execute(Storage* storage, Response& res) {
 }
 
 
+template <typename T>
+double Number<T>::getValue() const{
+    return value;
+}
 
-
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Number<T>& n) {
+    os << "value:" << n.getValue() << std::endl;
+    return os;
+}
+template <typename T>
+Value* Number<T>::toValue() {
+    return new NumberValue<T>(this->value);
+}
