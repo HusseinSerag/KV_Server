@@ -85,7 +85,7 @@ void String::execute(Storage* storage, Response& res) {
             default:
             // check if command is wrong type or not
             if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN || List::parseCommand(command) != ListC::UNKNOWN){
-                throw TypeMismatchException(command);
+                throw TypeMismatchException(command, "string");
             }
             
                 throw WrongCommandException("unknown command");

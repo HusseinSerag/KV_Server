@@ -9,6 +9,9 @@ std::string StringListValue::toString() const {
    return value->toString();
 }
 
+int StringListValue::length() const {
+    return value->getSize();
+}
 Value* StringListValue::clone() const {
     return new StringListValue();
 } 

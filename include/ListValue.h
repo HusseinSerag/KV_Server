@@ -6,6 +6,8 @@
 class ListValue: public Value {
       public:
 
+
+      virtual int length() const = 0;
       template <typename T>
    static  void insert(T val, RedBlackTree<T>* value);
     template <typename T>

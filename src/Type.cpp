@@ -13,7 +13,7 @@
 #include "String.h"
 #include "exception/TypeMismatchException.h"
 #include "exception/WrongCommandException.h"
-
+#include "List.h"
 
 Type::~Type() {}
 Type::Type() {}
@@ -95,8 +95,8 @@ int8_t Type::read(std::vector<std::string> & command, Response& res){
         }
         case Generic::UNKNOWN:
         default:
-        if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
-                throw TypeMismatchException(command);
+        if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN || List::parseCommand(command) != ListC::UNKNOWN){
+                throw TypeMismatchException(command, "generic commands");
             }
         throw WrongCommandException("unknown command");
     }

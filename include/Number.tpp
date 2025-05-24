@@ -129,7 +129,7 @@ void Number<T>::execute(Storage* storage, Response& res) {
             }
             default:
             if(Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) !=  Str::StringCommand::UNKNOWN || List::parseCommand(command) != ListC::UNKNOWN)  {
-                 throw TypeMismatchException(command);
+                 throw TypeMismatchException(command, "number");
             }
                 throw WrongCommandException("unknown command");
         }

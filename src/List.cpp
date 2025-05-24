@@ -13,8 +13,9 @@
     
      enum ListC::ListCommand List::parseCommand(const std::string& command){
         if(command == "ladd"){return ListC::LADD;}
-        if(command == "len") {return ListC::LEN;}
+        if(command == "llen") {return ListC::LEN;}
         if(command == "execute") {return ListC::EXECUTE; }
+        if(command == "remove") {return ListC::LREMOVE; }
         return ListC::UNKNOWN;
     };
     // int8_t List::read(std::vector<std::string>& request, Response& res) {
@@ -28,13 +29,23 @@
     //     return 1;
         
     // };
+
+    
+   
     // void List::execute(Storage* storage, Response& res) {
     //     std::string& command = this->command;
     //     switch(parseCommand(command)){
-       
-            
-              
-               
+    //         case ListC::LEN:
+    //              Value** val = storage->table->get(key);
+    //             if (val == NULL) throw NotFoundException();
+
+    //             ListValue* list = dynamic_cast<ListValue*>(*val);
+    //             if (!list) throw BaseException("incorrect type for llen", ERROR);
+
+    //             int len = length(list);
+    //             res.output = std::to_string(len);
+    //             break;
+                 
     //     }
     // }
 
@@ -112,9 +123,5 @@ void List::parse(std::vector<std::string>& cmd, Type* &type) {
 
 
 void List::_read_common(std::vector<std::string>& request,  ListC::ListCommand cmd){
-    if(cmd == ListC::LEN){
-        if(request.size() > 2){
-            throw WrongCommandException("format is [len] [key] !");
-        }
-    }
+  
 }

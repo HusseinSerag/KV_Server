@@ -168,8 +168,8 @@ template <typename T>
    }
   template <typename T>
    void RedBlackTree<T>::delete_violation(RBNode<T>* node)   {
-        while (node != root && node->color == BLACK) {
-            if (node == node->parent->left) {
+        while (node != root && node->parent && node->color == BLACK) {
+            if ( node == node->parent->left) {
                RBNode<T>* sibling = node->parent->right;
                 if (sibling->color == RED) {
                     sibling->color = BLACK;
@@ -256,7 +256,7 @@ template <typename T>
             // check
             parent = temp;
             temp->size++;
-            if(n->val < temp->val){
+            if(*(n->val) < *(temp->val)){
                temp = temp->left;
             } else {
                temp = temp->right;
@@ -265,7 +265,7 @@ template <typename T>
             
          
          // insert
-         if(n->val < parent->val)
+         if(*(n->val) < *(parent->val))
             parent->left = n;
          else 
             parent->right = n;
@@ -434,7 +434,7 @@ template <typename T>
          output += "[";
          inorder(root,output);
          output.pop_back();
-         output += "]";
+         output += " ]";
          return output;
        }
       template <typename T>
@@ -459,11 +459,12 @@ template <typename T>
     RBNode<T> * RedBlackTree<T>::search(T val) {
        RBNode<T> * temp = root;
        while(temp != NIL){
-         if(val == temp->val){
+         std::cout << (*val).toString() << " " << (*(temp->val)).toString() << std::endl;
+         if(*val == *(temp->val)){
            return temp;
-         } else if(val > temp->val){
+         } else if(*val > *(temp->val)){
             temp = temp->right;
-         } else if(val < temp->val){
+         } else if(*val < *(temp->val)){
             temp = temp->left;
          }
       }
@@ -478,7 +479,7 @@ template <typename T>
 
     while (temp != NIL) {
         int leftSize = temp->left->size;
-
+      
         if (val == leftSize + 1) {
             return temp;
         } else if (val <= leftSize) {

@@ -12,5 +12,6 @@ class StringListValue: public ListValue {
      Value* clone() const override;
      RedBlackTree<StringValue *>* getValue();
      ~StringListValue();
+     int length() const;
     
 };

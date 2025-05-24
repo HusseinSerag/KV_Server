@@ -137,7 +137,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             
             if(val == NULL)  {
                 type = new Type();
-                if(Type::_parseCommand(cmd[0]) == Generic::UNKNOWN || Number<int>::parseCommand(cmd[0]) == NumberCommand::UNKNOWN || String::parseCommand(cmd[0]) == Str::StringCommand::UNKNOWN || List::parseCommand(cmd[0]) == ListC::UNKNOWN) throw WrongCommandException("Unknown command!");
+                if(Type::_parseCommand(command) == Generic::UNKNOWN && Number<int>::parseCommand(command) == NumberCommand::UNKNOWN && String::parseCommand(command) == Str::StringCommand::UNKNOWN && List::parseCommand(command) == ListC::UNKNOWN) throw WrongCommandException("Unknown command!");
                 throw NotFoundException();
             };
             switch((*val)->getType()){

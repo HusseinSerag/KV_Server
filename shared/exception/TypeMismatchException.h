@@ -4,5 +4,5 @@
 #include <string>
 class TypeMismatchException: public BaseException {
     public: 
-    TypeMismatchException(const std::string& cmd);
+    TypeMismatchException(const std::string& cmd, const std::string& type);
 };
