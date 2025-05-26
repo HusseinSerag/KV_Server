@@ -16,6 +16,7 @@
         if(command == "llen") {return ListC::LEN;}
         if(command == "execute") {return ListC::EXECUTE; }
         if(command == "remove") {return ListC::LREMOVE; }
+        if(command == "update") {return ListC::UPDATE; }
         return ListC::UNKNOWN;
     };
     // int8_t List::read(std::vector<std::string>& request, Response& res) {

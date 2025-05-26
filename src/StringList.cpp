@@ -24,12 +24,12 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                 this->values.push_back((request[i]));
             }
         }
-         if(cmd == ListC::LEN){
+         else if(cmd == ListC::LEN){
         if(request.size() > 2){
             throw WrongCommandException("format is len [key] !");
         }
     }
-    if(cmd == ListC::LREMOVE) {
+    else if(cmd == ListC::LREMOVE) {
         if(request.size() < 3 || request.size() > 4){
             throw WrongCommandException("format is remove [key] ([value] | index [index])!");
         }
@@ -49,6 +49,32 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
         values.push_back(request[2]);
     }
         
+    } else if(cmd == ListC::UPDATE){
+        // update key value [new value]
+        // update key index number [new value]
+        if(request.size() < 4 || request.size() > 5){
+              throw WrongCommandException("format is update [key] ([value] [new value] | index [index] [new value])!");
+        }
+        if(request[2] == "index"){
+            // expect index
+            if( Helper::isNumber(request[3]) == NumberKind::NOT_NUMBER ||  Helper::isNumber(request[3]) == NumberKind::DOUBLE){
+            throw WrongCommandException("Index value must be an integer");
+        }
+        if(request.size() == 4){
+            throw WrongCommandException("format is update [key] index [index] [new value]");
+        }
+        index = std::stoi(request[3]);
+        hasIndex = true;
+        this->values.push_back(request[4]);
+
+        }
+         else {
+                 if(request.size() == 5){
+              throw WrongCommandException("format is update [key] [value] [new value]");
+        }
+        values.push_back(request[2]);
+        values.push_back(request[3]);
+        }
     }
         return 1;
     }
@@ -127,6 +153,32 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                         throw BaseException(("Index must be between 0 and " + std::to_string(list->length() - 1)),ERROR);
                     }
                     list->removeAtIndex(index + 1, list->getValue());
+                }
+                res.output = "OK";
+                break;
+
+        }
+        case ListC::UPDATE: {
+             Value** val = storage->table->get(key);
+                if (val == NULL) throw NotFoundException();
+
+                StringListValue* list = dynamic_cast<StringListValue*>(*val);
+                if (!list) throw BaseException("incorrect type for update", ERROR);
+                if(!hasIndex){
+                     StringValue toSearch(values[0]);
+                     
+                    if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
+                        throw NotFoundException();
+                    } 
+                    list->getValue()->remove(&toSearch);
+                    ListValue::insert<StringValue *>(new StringValue(values[1]), list->getValue());
+                    
+                } else {
+                     if(index + 1 > list->length() || index < 0){
+                        throw BaseException(("Index must be between 0 and " + std::to_string(list->length() - 1)),ERROR);
+                    }
+                   
+                    list->updateAtIndex(new StringValue(values[0]), 1, list->getValue());
                 }
                 res.output = "OK";
                 break;

@@ -400,6 +400,7 @@ template <typename T>
         RBNode<T>* node = rank(ind);
         if(node != NIL){
          node = _remove(node);
+         delete node->val;
          node->val = val;
          _insert(node);
         }

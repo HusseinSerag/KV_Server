@@ -15,7 +15,7 @@
     void ListValue::updateAtIndex(T val, int ind,RedBlackTree<T>* value) {
         value->updateByIndex(val, ind);
     }
-
+    
     template <typename T>
     void ListValue::removeAtIndex(int ind,RedBlackTree<T>* value) {
         value->removeByIndex(ind);
