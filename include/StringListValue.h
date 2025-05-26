@@ -13,5 +13,7 @@ class StringListValue: public ListValue {
      RedBlackTree<StringValue *>* getValue();
      ~StringListValue();
      int length() const;
+     void save(std::ostream& out);
+     void load(std::istream& in);
     
 };

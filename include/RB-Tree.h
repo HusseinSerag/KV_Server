@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <functional>
 enum Color {RED, BLACK};
 
 template <typename T>
@@ -46,6 +47,7 @@ class RedBlackTree {
     void delete_violation(RBNode<T>* node)  ;
     void _insert(RBNode<T>* n) ;
     RBNode<T>* _remove(RBNode<T>* toDelete);
+    void _inorder(RBNode<T>* root,std::function<void(T, std::ostream& )> cb,  std::ostream& out);
     public:
       ~RedBlackTree();
       RedBlackTree();
@@ -64,7 +66,9 @@ class RedBlackTree {
    RBNode<T>*  rank(int val);
    void print(RBNode<T>* root, std::string indent, bool last);
    void deleteTree(RBNode<T>* root) ;
+   void inorder_cb(std::function<void(T, std::ostream& )> cb, std::ostream& out);
 };
+
 
 
 

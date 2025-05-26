@@ -1,5 +1,6 @@
 #include <iostream>
 #include "RB-Tree.h"
+#include <functional>
 
 
 template <typename T>
@@ -523,4 +524,15 @@ template <typename T>
    }
 
 
+   template <typename T>
+   void RedBlackTree<T>::inorder_cb(std::function<void(T, std::ostream& )> cb, std::ostream& out){
+      _inorder(root, cb, out);
+   }
+    template <typename T>
+ void RedBlackTree<T>::_inorder(RBNode<T>* root,std::function<void(T, std::ostream& )> cb,  std::ostream& out){
+   if(root == NIL) return;
+   _inorder(root->left,cb,out);
+   cb(root->val,out);
+   _inorder(root->right,cb,out);
+ }
 

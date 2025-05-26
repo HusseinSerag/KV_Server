@@ -18,8 +18,6 @@ class ListValue: public Value {
     template <typename T>
     static T getAtIndex(int ind,RedBlackTree<T>* value);
     
-   void save(std::ostream& out);
-    void load(std::istream& in);
  
 
 };

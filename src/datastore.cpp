@@ -13,6 +13,7 @@
 #include <filesystem>
 #include "Logger.h"
 #include "Value.h"
+#include "StringListValue.h"
 Storage* Storage::instance = nullptr;
 
     Storage* Storage::getInstance() {
@@ -150,6 +151,8 @@ for(int i = 0; i < capacity; i++){
     else if(tag == 0x02) {
         val = new StringValue("");
 
+    } else if(tag ==  0x12) {
+        val = new StringListValue();
     }
     if(val){
     val->load(in);
