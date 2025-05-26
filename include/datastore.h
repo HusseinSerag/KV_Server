@@ -13,6 +13,7 @@ class Storage: public Serializable {
     static Storage* instance;
     void load(std::istream &in);
     void save(std::ostream& out);
+    bool isEnabled;
     public:
     Hashtable<std::string, Value*>* table;
     static Storage* getInstance();

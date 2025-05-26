@@ -15,7 +15,7 @@ class Config {
     
     public:
     bool setup(char** argv, int argc);
-    std::string get(const std::string& key);
+    const std::string& get(const std::string& key);
     static Config* getInstance();
     static void deleteInstance();
     std::string getErrors();

@@ -23,6 +23,9 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
         if(config.get("persistence") == NULL){
             config.set("persistence",  "1");
         }
+        if(config.get("log_enabled") == NULL){
+            config.set("log_enabled","1");
+        }
     }
     bool Config::rules(std::string& key,std::string& value) {
         if(key == "port"){
@@ -40,6 +43,8 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
             }
         } else if(key == "persistence"){
             return value == "0" || value == "1";
+        } else if(key == "log_enabled"){
+            return value == "0" || value == "1";
         }
         return true;
     }
@@ -51,6 +56,7 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
             // --log_file=
             // --data_file=
             // --persistence=1 or 0 , as in to either write to memory or not by default is persisted
+            // --log_enabled = 1 or 0, as in either allow logging or not by default is allowed
             if(arg[0] != '-' || arg[1] != '-'){
                 errors = "format is --<key>=<value> !";
                 return false;
@@ -70,7 +76,7 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
 
             // add key to config if it is a correct key
             std::string cand_key(key);
-            if(cand_key == "port" || cand_key == "log_file" || cand_key == "data_file" || cand_key == "persistence") {
+            if(cand_key == "port" || cand_key == "log_file" || cand_key == "data_file" || cand_key == "persistence" || cand_key == "log_enabled") {
                 std::string cand_value(value);
             // rules
             if(!rules(cand_key,cand_value)){
@@ -86,12 +92,13 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
         return true;
     }
 
-    std::string Config::get(const std::string& key){
+    const std::string& Config::get(const std::string& key){
         std::string* res = config.get(key);
         if(res != NULL) {
             return *res;
         }
-        return "";
+        static const std::string empty = "";
+        return empty;
     }
 
     Config* Config::getInstance() {

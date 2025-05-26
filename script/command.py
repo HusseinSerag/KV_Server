@@ -40,7 +40,7 @@ def parse_resp(socket, cb):
 
     data = payload[4:]
 
-    cb(f"Status: {status}:{data.decode()}".replace("%"," "))
+    #cb(f"Status: {status}:{data.decode()}".replace("%"," "))
 
 
 def send_all(sock, data: bytes):

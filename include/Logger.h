@@ -7,6 +7,7 @@
 class Logger {
 
     static std::ofstream logFile;
+    static bool isEnabled;
     public:
         static void open();
         static void log(std::string& message);

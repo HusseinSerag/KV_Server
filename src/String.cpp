@@ -62,9 +62,10 @@ void String::execute(Storage* storage, Response& res) {
                 Value** val = storage->table->get(key);
                 if (val == NULL) throw NotFoundException();
 
-                StringValue* str = dynamic_cast<StringValue*>(*val);
-                if (!str) throw BaseException("incorrect type for increment", ERROR);
-
+                
+                if((*val)->getType() != ValueType::STRING)
+                 throw BaseException("incorrect type for increment", ERROR);
+                StringValue* str = (StringValue *)(*val);
                 int len = str->length();
                 res.output = std::to_string(len);
                 break;
@@ -74,9 +75,9 @@ void String::execute(Storage* storage, Response& res) {
              Value** val = storage->table->get(key);
                 if (val == NULL) throw BaseException("not found", NOT_FOUND);
 
-                StringValue* str = dynamic_cast<StringValue*>(*val);
-                if (!str) throw BaseException("incorrect type for increment", ERROR);
-
+               if((*val)->getType() != ValueType::STRING)
+                 throw BaseException("incorrect type for concat", ERROR);
+                StringValue* str =(StringValue *)(*val);
                 str->concat(value);
                 res.output = str->toString();
                 break;

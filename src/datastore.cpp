@@ -29,10 +29,10 @@ Storage::Storage(){
 // try to load from disk first
 Config* config = Config::getInstance();
 // if persistence is on then read try to read from file
-int persistence = std::stoi(config->get("persistence"));
-if(persistence) {
-
-    std::string file = config->get("data_file");
+const std::string& persistence = config->get("persistence");
+isEnabled = persistence == "1";
+if(isEnabled) {
+    const std::string& file = config->get("data_file");
     std::ifstream in(file,std::ios::binary);
     if(in){
         
@@ -69,9 +69,9 @@ void Storage::deleteInstance() {
 
 void Storage::write(){
     Config* config = Config::getInstance();
-    int persistence = std::stoi(config->get("persistence"));
-    if(persistence) {
-        std::string file = config->get("data_file");
+    
+    if(isEnabled) {
+        const std::string& file = config->get("data_file");
         std::filesystem::path filepath(file);
         if(filepath.has_parent_path()){
             std::filesystem::create_directories(filepath.parent_path());
