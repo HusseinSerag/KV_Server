@@ -4,7 +4,7 @@
 namespace ListC {
 
     enum ListCommand {
-        LADD, LEN, EXECUTE, LREMOVE, UNKNOWN
+        LADD, LEN, EXECUTE, LREMOVE, UPDATE, UNKNOWN
     };
 }
 

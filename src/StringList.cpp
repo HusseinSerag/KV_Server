@@ -86,8 +86,6 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                     } else {
                         list = ll;
                     }
-                    
-
                    }
                 }
                 // dynamic cast
@@ -116,7 +114,7 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                 StringListValue* list = dynamic_cast<StringListValue*>(*val);
                 if (!list) throw BaseException("incorrect type for remove", ERROR);
                 if(!hasIndex){
-                    std::cout << "here11" << std::endl;
+                    
                     StringValue toSearch(values[0]);
                     if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
                         throw NotFoundException();
@@ -124,7 +122,7 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                     list->getValue()->remove(&toSearch);
                     
                 } else {
-                      std::cout << "here12" << std::endl;
+                      
                     if(index + 1 > list->length() || index < 0){
                         throw BaseException(("Index must be between 0 and " + std::to_string(list->length() - 1)),ERROR);
                     }
@@ -134,6 +132,7 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                 break;
 
         }
+        // add case update by element then save to memory commands then implement number types then refactor
         default:
             if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
                 throw TypeMismatchException(command,"list of strings");
