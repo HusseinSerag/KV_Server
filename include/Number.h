@@ -18,7 +18,7 @@ public:
    // void write(std::vector<uint8_t>& out_buffer, Response& res);
     void execute(Storage* storage, Response& res);
     static enum NumberCommand parseCommand(const std::string& command);
-    Number(const std::string& val);
+    Number(const std::string& val, Value* value = NULL);
     Number();
     double getValue() const;
     Value* toValue();

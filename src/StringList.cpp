@@ -9,6 +9,10 @@
 #include "String.h"
 #include "Logger.h"
 #include "exception/NotFoundException.h"
+
+    StringList::StringList(Value* val){
+        this->val = val;
+    }
 int8_t StringList::read(std::vector<std::string>& request, Response& res){
 
     

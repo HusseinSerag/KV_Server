@@ -12,9 +12,13 @@
 #include "exception/NotFoundException.h"
 #include "exception/TypeMismatchException.h"
 
-String::String(){}
-String::String(const std::string& val){
-    this->value = val;
+String::String(){
+    this->val = NULL;
+}
+String::String(const std::string& str,Value* val){
+    this->value = str;
+    this->val = val;
+
 }
 int8_t String::read(std::vector<std::string> &request, Response& res)  {
 
@@ -51,7 +55,15 @@ enum Str::StringCommand String::parseCommand(const std::string& command) {
 
 void String::execute(Storage* storage, Response& res) {
  std::string& commandStr = this->command;
-    try {
+ StringValue* str = NULL;
+ try {
+        if(val){
+            if( val->getType() != ValueType::STRING){
+                throw BaseException("incorrect type for string operation!", ERROR);
+            }
+            str =(StringValue *)(val);
+        }
+    
         switch(parseCommand(command)) {
             case Str::StringCommand::SET: {
                 Value::set<StringValue, std::string>(key,value);
@@ -59,25 +71,12 @@ void String::execute(Storage* storage, Response& res) {
                 break;
             }
             case Str::StringCommand::LENGTH: {
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                
-                if((*val)->getType() != ValueType::STRING)
-                 throw BaseException("incorrect type for increment", ERROR);
-                StringValue* str = (StringValue *)(*val);
                 int len = str->length();
                 res.output = std::to_string(len);
                 break;
             }
 
             case Str::StringCommand::CONCAT: {
-             Value** val = storage->table->get(key);
-                if (val == NULL) throw BaseException("not found", NOT_FOUND);
-
-               if((*val)->getType() != ValueType::STRING)
-                 throw BaseException("incorrect type for concat", ERROR);
-                StringValue* str =(StringValue *)(*val);
                 str->concat(value);
                 res.output = str->toString();
                 break;

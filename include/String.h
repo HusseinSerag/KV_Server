@@ -4,6 +4,7 @@
 #include "Type.h"
 #include "Scalar.h"
 #include <iostream>
+#include "Value.h"
 namespace Str {
  enum StringCommand {
     SET,  CONCAT, LENGTH, UNKNOWN,
@@ -17,7 +18,8 @@ public:
     void execute(Storage* storage, Response& res) override;
     static enum Str::StringCommand parseCommand(const std::string& command);
     String();
-    String(const std::string& val);
+    String(const std::string& val,Value* value = NULL);
+    
     friend std::ostream& operator<<(std::ostream& os, const String& str);
     Value* toValue() override;
     std::string getValue();

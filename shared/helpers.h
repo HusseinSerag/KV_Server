@@ -25,6 +25,7 @@ class Helper {
      static bool is_number(const std::string& s);
      template <class T>
      static T convert(const std::string& str);
+     static size_t nextPower2(size_t n);
 
 };
 

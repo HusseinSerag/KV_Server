@@ -142,16 +142,16 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             };
             switch((*val)->getType()){
                 case ValueType::DOUBLE:
-                    type = new Number<double>();
+                    type = new Number<double>("0",*val);
                     break;
                 case ValueType::INT64: // ints
-                    type = new Number<int64_t>();
+                    type = new Number<int64_t>("0",*val);
                     break;
                 case ValueType::STRING:
-                    type = new String();
+                    type = new String("",*val);
                     break;
                 case ValueType::LIST_STRING:
-                    type = new StringList();
+                    type = new StringList(*val);
                     break;
                 default:
                     // unsupported type

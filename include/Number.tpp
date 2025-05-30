@@ -15,10 +15,14 @@
 #include "List.h"
 
 template <typename T>
-Number<T>::Number(){}
+Number<T>::Number(){
+    this->val = NULL;
+}
+
 template <typename T>
-Number<T>::Number(const std::string& val){
-    this->value = std::stod(val);
+Number<T>::Number(const std::string& value,Value* val){
+    this->value = std::stod(value);
+    this->val = val;
 }
 template <typename T>
 int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
@@ -34,7 +38,7 @@ int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
     this->key = command[1];
     enum NumberCommand cmd = parseCommand(this->command);
     if(cmd == NumberCommand::DEC || cmd == NumberCommand::INC){
-        if(Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
+        if(command.size() == 3 && Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
              throw WrongCommandException("Value provided must be a number!");
         }
         this->value = command.size() == 3 ? std::stod(command[2]) : 1;
@@ -68,7 +72,15 @@ enum NumberCommand Number<T>::parseCommand(const std::string& command) {
 template <typename T>
 void Number<T>::execute(Storage* storage, Response& res) {
  std::string commandStr = this->command;
+    NumberValue<T>* num = NULL;
     try {
+
+        if(this->val != NULL){
+            if(val->getType() != ValueType::DOUBLE && val->getType() != ValueType::INT64){
+                throw BaseException("incorrect type for number operation!", ERROR);
+            }
+            num = (NumberValue<T>*)(val);
+        }
         switch(parseCommand(command)) {
             case NumberCommand::SET: {
 
@@ -79,51 +91,26 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 break;
             }
             case NumberCommand::INC: {
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
-                if (!u64Val) throw BaseException("incorrect type for increment", ERROR);
-
-                u64Val->increment();
+                num->increment();
                 res.output = "OK";
                 break;
             }
 
             case NumberCommand::DEC: {
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
-                if (!u64Val) throw BaseException("incorrect type for decrement", ERROR);
-
-                u64Val->decrement();
+                num->decrement();
                 res.output = "OK";
                 break;
             }
 
             case NumberCommand::MULT: {
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
-                if (!u64Val) throw BaseException("incorrect type for multiplication", ERROR);
-
-                u64Val->multiply(value);
+                num->multiply(value);
                 res.output = "OK";
                 break;
             }
 
             case NumberCommand::DIVIDE: {
                 if (value == 0) throw BaseException("division by zero", ERROR);
-
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                NumberValue<T>* u64Val = dynamic_cast<NumberValue<T>*>(*val);
-                if (!u64Val) throw BaseException("incorrect type for division", ERROR);
-
-                u64Val->divide(value);
+                num->divide(value);
                 res.output = "OK";
                 break;
             }

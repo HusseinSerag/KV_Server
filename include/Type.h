@@ -25,6 +25,7 @@ class Type {
 protected:
     std::string command;
     std::string key;
+    Value* val;
     
     public:
     static enum Generic::GenericCommands _parseCommand(const std::string& command);

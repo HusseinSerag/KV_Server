@@ -9,6 +9,19 @@
 #include <sstream>
 #include <unistd.h>
 
+size_t Helper::nextPower2(size_t n){
+    if (n == 0) return 2;
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    #if SIZE_MAX > 0xFFFFFFFF
+        n |= n >> 32;
+    #endif
+    return n + 1;
+}
 std::string Helper::getCurrentTimestamp() {
     auto now = std::chrono::system_clock::now();
     std::time_t in_time_t = std::chrono::system_clock::to_time_t(now);

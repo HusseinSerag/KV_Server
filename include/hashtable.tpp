@@ -4,13 +4,14 @@
 #include "helpers.h"
 #include <string>
 #include <deque>
+#include <cstddef>
 
 
 template <typename K, typename V>
 const float Hashtable<K,V>::LOAD_FACTOR_THRESHOLD = 0.75f;
 template <typename K, typename V>
 Hashtable<K, V>::Hashtable(int capacity) {
-    this->capacity = capacity > 0 ? capacity : 16;
+    this->capacity = capacity > 0 ? Helper::nextPower2((size_t)capacity) : 16;
     arr = new SinglyLinkedList<K, V>[this->capacity]();
     size = 0;
 }
@@ -32,7 +33,7 @@ delete[] arr;
 }
 template<typename K, typename V>
 void Hashtable<K,V>::unsafe_set(K key, V val) {
-    int ind = Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
+    int ind = Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
     arr[ind].appendToFront(key, val);
     size++;
 }
@@ -57,7 +58,7 @@ void Hashtable<K,V>::resize() {
 }
 template <typename K, typename V>
 void Hashtable<K, V>::set(K key, V val) {
-    int ind = Helper::DJBHash(key.c_str(), key.size()) % this->capacity; // Replace this with proper hashing in future
+    int ind = Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1); // Replace this with proper hashing in future
     SinglyLinkedList<K, V>& l = arr[ind];
 
     Node<K, V>* node = l.search(key);
@@ -78,7 +79,7 @@ void Hashtable<K, V>::set(K key, V val) {
 
 template <typename K, typename V>
 V* Hashtable<K, V>::get(K key) {
-    int ind =  Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
+    int ind =  Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
     SinglyLinkedList<K, V>& l = arr[ind];
     Node<K, V>* node = l.search(key);
     if (node != NULL) {
@@ -89,7 +90,7 @@ V* Hashtable<K, V>::get(K key) {
 
 template <typename K, typename V>
 int Hashtable<K, V>::remove(K key) {
-    int ind =  Helper::DJBHash(key.c_str(), key.size()) % this->capacity;
+    int ind =  Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
     SinglyLinkedList<K, V>& l = arr[ind];
     int res = l.deleteBySearch(key);
     if (res) size--;
