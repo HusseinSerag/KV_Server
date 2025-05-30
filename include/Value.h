@@ -20,6 +20,7 @@ class Value {
         template <typename T,typename V>
         static void set(std::string& key, V value);
         virtual enum ValueType getType() = 0;
+        static bool isListType(ValueType& type);
         
         
 

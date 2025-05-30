@@ -20,4 +20,14 @@ Storage* storage = Storage::getInstance();
 }
 
 
+ bool Value::isListType(ValueType& type) {
+        switch(type) {
+            case ValueType::LIST_DOUBLE:
+            case ValueType::LIST_INT64:
+            case ValueType::LIST_STRING:
+            return true;
+            default: return false;
+        }
+ }
+
 

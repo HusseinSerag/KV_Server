@@ -86,35 +86,32 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
 
 
     void StringList::execute(Storage* storage, Response& res){
-        try{
         std::string& cmd = this->command;
+        try{
         switch (List::parseCommand(this->command))
         {
         case ListC::LADD:{
-
-            Value** val = storage->table->get(this->key);
-              StringListValue* list = NULL;
+                StringListValue* list = NULL;
                if(val == NULL){
                 // no list so override
                  list = new StringListValue();
                 storage->table->set(key,list);
                } else {
 
-                  ListValue* l = dynamic_cast<ListValue*>(*val);
+                ValueType t = val->getType();
                   // if list then we know its a list
-                   if(!l){
+                   if(!Value::isListType(t)){
                     // this isnt a list we can override 
                         list = new StringListValue();
                         storage->table->set(key,list);
                    } else {
                     // list with maybe wrong type so we check
-                    StringListValue* ll = dynamic_cast<StringListValue*>(l);
-                    if(!ll){
+                   
+                    if(!val->getType() != ValueType::LIST_STRING){
                         // error
-                        throw TypeMismatchException(this->command, "list of strings");
-                        
+                        throw TypeMismatchException(this->command, "list of strings");  
                     } else {
-                        list = ll;
+                        list = (StringListValue* )val;
                     }
                    }
                 }
@@ -126,75 +123,9 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
                 res.output = "OK";
             break;   
         }
-        
-        case ListC::LEN: {
-                Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                ListValue* list = dynamic_cast<ListValue*>(*val);
-                if (!list) throw BaseException("incorrect type for llen", ERROR);
-                int len = list->length();
-                res.output = std::to_string(len);
-                break;
-        }
-        case ListC::LREMOVE: {
-             Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                StringListValue* list = dynamic_cast<StringListValue*>(*val);
-                if (!list) throw BaseException("incorrect type for remove", ERROR);
-                if(!hasIndex){
-                    
-                    StringValue toSearch(values[0]);
-                    if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
-                        throw NotFoundException();
-                    } 
-                    list->getValue()->remove(&toSearch);
-                    
-                } else {
-                      
-                    if(index + 1 > list->length() || index < 0){
-                        throw BaseException(("Index must be between 0 and " + std::to_string(list->length() - 1)),ERROR);
-                    }
-                    list->removeAtIndex(index + 1, list->getValue());
-                }
-                res.output = "OK";
-                break;
-
-        }
-        case ListC::UPDATE: {
-             Value** val = storage->table->get(key);
-                if (val == NULL) throw NotFoundException();
-
-                StringListValue* list = dynamic_cast<StringListValue*>(*val);
-                if (!list) throw BaseException("incorrect type for update", ERROR);
-                if(!hasIndex){
-                     StringValue toSearch(values[0]);
-                     
-                    if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
-                        throw NotFoundException();
-                    } 
-                    list->getValue()->remove(&toSearch);
-                    ListValue::insert<StringValue *>(new StringValue(values[1]), list->getValue());
-                    
-                } else {
-                     if(index + 1 > list->length() || index < 0){
-                        throw BaseException(("Index must be between 0 and " + std::to_string(list->length() - 1)),ERROR);
-                    }
-                   
-                    list->updateAtIndex(new StringValue(values[0]), 1, list->getValue());
-                }
-                res.output = "OK";
-                break;
-
-        }
-        // add case update by element then save to memory commands then implement number types then refactor
+     
         default:
-            if(Number<int64_t>::parseCommand(command) != NumberCommand::UNKNOWN || Type::_parseCommand(command) != Generic::UNKNOWN || String::parseCommand(command) != Str::StringCommand::UNKNOWN){
-                throw TypeMismatchException(command,"list of strings");
-            }
-            
-                throw WrongCommandException("unknown command");
+            List::execute<StringListValue,StringValue,std::string>(storage,res,values);
         }
   
     } catch(const BaseException& exp) {

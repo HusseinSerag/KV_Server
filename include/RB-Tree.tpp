@@ -461,7 +461,6 @@ template <typename T>
     RBNode<T> * RedBlackTree<T>::search(T val) {
        RBNode<T> * temp = root;
        while(temp != NIL){
-         std::cout << (*val).toString() << " " << (*(temp->val)).toString() << std::endl;
          if(*val == *(temp->val)){
            return temp;
          } else if(*val > *(temp->val)){
