@@ -55,7 +55,7 @@ class RedBlackTree {
    int getSize();
    const RBNode<T>* getNil() ;
     void insert(T val);
-    void remove(T val) ;
+    int remove(T val) ;
     void updateByIndex(T val, int ind);
     void removeByIndex(int ind);
     RBNode<T> *  minimum(RBNode<T> * root);

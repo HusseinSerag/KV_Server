@@ -32,7 +32,7 @@ def generate_random_command():
     key = random_string()
 
     command_type = random.choice([
-        "set", "get",  "inc", "dec", "mult", "len", "concat", "keys", "unknown", "div", "del"
+        "set", "get",  "inc", "dec", "mult", "len", "concat", "keys", "unknown", "div", "del","ladd","remove","update"
     ])
 
     if command_type == "set":
@@ -46,12 +46,12 @@ def generate_random_command():
         return ["set", key, value]
 
 
-    # elif command_type == "ladd":
-    #     return   [command_type, key, random_string()]    
-    # elif command_type == "remove":
-    #     return [command_type, key, "index", random_int()]
-    # elif command_type == "update":
-    #     return [command_type, key, "index", random_int(), random_string()]
+    elif command_type == "ladd":
+        return   [command_type, key, random_string()]    
+    elif command_type == "remove":
+        return [command_type, key, "index", random_int()]
+    elif command_type == "update":
+        return [command_type, key, "index", random_int(), random_string()]
     elif command_type in ["get", "inc", "dec", "len"]:
         return [command_type, key]
 
@@ -148,4 +148,4 @@ def run_test(n=1000):
     print("Test done, check results")
 
 if __name__ == "__main__":
-    run_test(5000)
+    run_test(10000)

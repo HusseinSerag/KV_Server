@@ -391,11 +391,14 @@ template <typename T>
          RBNode<T>* n = new RBNode<T>(val, NIL,NIL, NIL, RED, 1);
          _insert(n);
       }template <typename T>
-      void RedBlackTree<T>::remove(T val) {
+      int RedBlackTree<T>::remove(T val) {
          RBNode<T>* toDelete = search(val);
          RBNode<T>* n = _remove(toDelete);
-         if(n)
-         delete n;
+         if(n){
+            delete n;
+            return 1;
+         }
+         return 0;
       }template <typename T>
       void RedBlackTree<T>::updateByIndex(T val, int ind){
         RBNode<T>* node = rank(ind);
@@ -405,7 +408,6 @@ template <typename T>
          node->val = val;
          _insert(node);
         }
-         
       }template <typename T>
       void RedBlackTree<T>::removeByIndex(int ind){
          RBNode<T>* node = rank(ind);

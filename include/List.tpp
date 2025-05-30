@@ -30,11 +30,9 @@
                 if(!hasIndex){
                     
                     T toSearch(values[0]);
-                    if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
-                        throw NotFoundException();
+                    if(!list->getValue()->remove(&toSearch)){
+                        throw BaseException("Value not found!",ERROR);
                     } 
-                    list->getValue()->remove(&toSearch);
-                    
                 } else {
                       
                     if(index + 1 > list->length() || index < 0){
@@ -50,10 +48,9 @@
                 if(!hasIndex){
                      T toSearch(values[0]);
                      
-                    if(list->getValue()->search(&toSearch) == list->getValue()->getNil()){
+                    if(!list->getValue()->remove(&toSearch)){
                         throw BaseException("Value not found!",ERROR);
                     } 
-                    list->getValue()->remove(&toSearch);
                     ListValue::insert<T *>(new T(values[1]), list->getValue());
                     
                 } else {
