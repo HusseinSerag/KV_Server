@@ -2,7 +2,7 @@
 #include "Value.h"
 
 enum ValueType StringListValue::getType() {
-    return ValueType::LIST_STRING;
+    return type;
 }
 
 std::string StringListValue::toString() const {
@@ -22,6 +22,7 @@ RedBlackTree<StringValue *>* StringListValue::getValue(){
 
 StringListValue::StringListValue() {
     value  = new RedBlackTree<StringValue *>();
+    this->type = ValueType::LIST_STRING;
 }
 
 

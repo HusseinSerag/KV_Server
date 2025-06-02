@@ -74,25 +74,5 @@ void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
                         }
 }
 
-void List::parse(std::vector<std::string>& cmd, Type* &type) {
-                 
-                enum ListC::ListCommand command = List::parseCommand(cmd[0]);
-                NumberKind t;
-                if(command == ListC::LADD){
-                    List::parse_add(cmd,t);
-                }
-                    switch(t){
-                            case NumberKind::INTEGER:
-                           // type = new List<Number<int64_t>,NumberValue<int64_t> *>();
-                            break;
-                            case NumberKind::DOUBLE:
-                           // type = new List<Number<double>,NumberValue<double>*>();
-                            break;
-                            case NumberKind::NOT_NUMBER:
-                            type = new StringList();
-                        }
-                }
-            
-
 
 

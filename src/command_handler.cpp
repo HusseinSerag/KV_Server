@@ -16,7 +16,7 @@
 #include "exception/MalformedMessage.h"
 #include "List.h"
 #include "StringList.h"
-
+#include "NumberList.h"
 
 
 void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::string& data, Response& out) {
@@ -114,10 +114,10 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 List::parse_add(cmd,t);
                 switch(t) {
                     case NumberKind::INTEGER:
-                        type = new Type();
+                        type = new NumberList<int64_t>();
                         break;
                     case NumberKind::DOUBLE:
-                        type = new Type();
+                        type = new NumberList<double>();
                         break;
                     case NumberKind::NOT_NUMBER:
                         type = new StringList();
@@ -152,6 +152,12 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                     break;
                 case ValueType::LIST_STRING:
                     type = new StringList(*val);
+                    break;
+                case ValueType::LIST_DOUBLE:
+                    type = new NumberList<double>(*val);
+                    break;
+                case ValueType::LIST_INT64:
+                    type = new NumberList<int64_t>(*val);
                     break;
                 default:
                     // unsupported type

@@ -18,7 +18,9 @@ class List : public Type {
     static enum ListC::ListCommand parseCommand(const std::string& command); 
     template <class L, class T, class V>
      void execute(Storage* storage, Response& res, std::vector<V>& values);
-    static void parse(std::vector<std::string>& cmd, Type* &type);
+
+     template <class T>
+   void read(std::vector<std::string>& request, std::vector<T>& values,enum ListC::ListCommand cmd);
     
    
 

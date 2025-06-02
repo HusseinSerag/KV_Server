@@ -91,13 +91,13 @@ void Number<T>::execute(Storage* storage, Response& res) {
                 break;
             }
             case NumberCommand::INC: {
-                num->increment();
+                num->increment(value);
                 res.output = "OK";
                 break;
             }
 
             case NumberCommand::DEC: {
-                num->decrement();
+                num->decrement(value);
                 res.output = "OK";
                 break;
             }

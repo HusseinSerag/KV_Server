@@ -25,13 +25,13 @@ enum ValueType NumberValue<T>::getType() {
     return this->type;
 }
 template <typename T>
-void NumberValue<T>::increment(){
-    this->value++;
+void NumberValue<T>::increment(double n){
+    this->value+=n;
 }
 
 template <typename T>
-void NumberValue<T>::decrement() {
-    this->value--;
+void NumberValue<T>::decrement(double n) {
+    this->value-=n;
 }
 
 template <typename T>
