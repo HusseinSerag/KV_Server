@@ -65,7 +65,7 @@ Config::Config():config(Hashtable<std::string, std::string>(8)) {
 
             char* key = strtok((char *)arg,"=");
             char* value = strtok(NULL,"=");
-
+            printf("%s:%s\n",key,value);
             // make sure only characters exist in key value
             for(int i = 0; key[i] != '\0'; i++){
                 if(!(key[i] >= 'a' && key[i] <= 'z') && !(key[i] >= 'A' && key[i] <= 'Z') && key[i] != '_'){

@@ -31,18 +31,6 @@ std::string Helper::getCurrentTimestamp() {
     return ss.str();
 }
 
- void Helper::msg(const char *msg) {
-        fprintf(stderr, "%s\n", msg);
-    }
-
-    void Helper::msg_errno(const char *msg) {
-        fprintf(stderr, "[errno:%d] %s\n", errno, msg);
-    }
-
-    void Helper::die(const char *msg) {
-        fprintf(stderr, "[%d] %s\n", errno, msg);
-        abort();
-    }
 
      bool Helper::read_str(const uint8_t* &cur, const uint8_t *end, size_t n, std::string &out) {
         if (cur + n > end) {

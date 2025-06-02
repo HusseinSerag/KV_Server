@@ -25,15 +25,6 @@
        return value->rank(ind)->getVal();
     }
     
-    
-    // template <typename T>
-    // Value* ListValue<T>::clone() const{}
-    // template <typename T>
-    // std::string ListValue<T>::toString() const {
-    //     return "RB tree";
-    // }
-    
-  
 
 
 

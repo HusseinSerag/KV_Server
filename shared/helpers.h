@@ -8,9 +8,16 @@ enum class NumberKind {
 };
 class Helper {
     public:
-    static void msg(const char *msg);
-    static void msg_errno(const char *msg);
-    static void die(const char *msg);
+    inline static void msg(const char *msg) {
+        fprintf(stderr, "%s\n", msg);
+    }
+    inline static void msg_errno(const char *msg) {
+        fprintf(stderr, "[errno:%d] %s\n", errno, msg);
+    }
+    inline static void die(const char *msg){
+        fprintf(stderr, "[%d] %s\n", errno, msg);
+        abort();
+    }
     template <typename T>
     static bool read_int(const uint8_t* &start, const uint8_t *end, T& out, int stride);
 
