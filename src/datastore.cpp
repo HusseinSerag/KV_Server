@@ -17,13 +17,24 @@
 #include "NumberListValue.h"
 Storage* Storage::instance = nullptr;
 
-    Storage* Storage::getInstance() {
+Storage* Storage::getInstance() {
             if(instance == nullptr){
                 Storage::instance = new Storage();
             }
             return Storage::instance;
-        }
+}
 
+Value** Storage::get(const std::string& key){
+    Value** val = this->table->get(key);
+    if(val == NULL) return val;
+    std::chrono::steady_clock::time_point* exp = this->expires->get(key);
+    if(exp == NULL){
+        return val;
+    } 
+    this->table->remove(key);
+    this->expires->remove(key);
+    return NULL;
+}
 Storage::Storage(){
 
     table = nullptr;

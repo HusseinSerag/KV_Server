@@ -105,7 +105,7 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
         }
         switch(cmd){
              case ListC::LADD:{
-               Value** v = storage->table->get(this->key);
+               Value** v = storage->get(this->key);
                if(v == NULL){
                 // no list so override
                 list = new L();

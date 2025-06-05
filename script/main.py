@@ -148,4 +148,4 @@ def run_test(n=1000):
     print("Test done, check results")
 
 if __name__ == "__main__":
-    run_test(10000)
+    run_test(50000)

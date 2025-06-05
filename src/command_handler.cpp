@@ -58,7 +58,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             }
             
             // read entire request sent
-            
+            cmd.reserve(nstr);
             while(cmd.size() < nstr){
                 // read 4 bytes length, then n bytes length of message
                 uint32_t len = 0;
@@ -67,6 +67,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 }
                
             std::string text;
+            text.reserve(nstr);
             if(!Helper::read_str(request,end,len, text)){
                throw MalformedMessageException();
             }
@@ -131,7 +132,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 throw WrongCommandException("Cannot have less than 2 strings for command");
             }
             Type::isKeyValid(cmd[1]);
-            Value** val = storage->table->get(cmd[1]);
+            Value** val = storage->get(cmd[1]);
             // based on this value create the correct type and pass type to do_response keep all checks in execute
               // start parsing based on command and key
             

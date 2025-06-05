@@ -14,7 +14,7 @@ void Value::del(std::string& key) {
 }
 Value* Value::get(std::string& key) {
 Storage* storage = Storage::getInstance();
-    Value** value = storage->table->get(key);
+    Value** value = storage->get(key);
     if (value == NULL) throw NotFoundException();
     return *value;
 }
