@@ -66,6 +66,18 @@ void SinglyLinkedList<K,V>::appendToFront(K key, V val) {
 }
 
 template <typename K, typename V>
+void SinglyLinkedList<K,V>::appendToFrontWithoutCreating(Node<K,V>* n){
+    n->next = head;
+    head = n;
+    size++;
+}
+
+
+template <typename K, typename V>
+void SinglyLinkedList<K,V>::setHead(Node<K,V>* n){
+    head = n;
+}
+template <typename K, typename V>
 Node<K,V>* SinglyLinkedList<K,V>::search(K key) {
     Node<K,V>* p = head;
     while (p != nullptr) {

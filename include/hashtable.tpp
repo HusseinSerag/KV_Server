@@ -32,9 +32,10 @@ Hashtable<K, V>::~Hashtable() {
 delete[] arr;  
 }
 template<typename K, typename V>
-void Hashtable<K,V>::unsafe_set(K key, V val) {
-    int ind = Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
-    arr[ind].appendToFront(key, val);
+void Hashtable<K,V>::unsafe_set(Node<K,V> * n) {
+    
+    int ind = Helper::DJBHash(n->getKey().c_str(), n->getKey().size()) & (this->capacity - 1);
+    arr[ind].appendToFrontWithoutCreating(n);
     size++;
 }
 template<typename K, typename V>
@@ -47,10 +48,13 @@ void Hashtable<K,V>::resize() {
     size = 0;
     for(int i = 0; i < oldCap ; i++){
         Node<K,V>* p = oldArr[i].getHead();
+        Node<K,V>* prev = NULL;
         while(p != NULL){
-        this->unsafe_set(p->getKey(),p->getValue());
-        p = p->getNext();
+            prev = p->getNext();
+        this->unsafe_set(p);
+        p = prev;
         }
+        oldArr[i].setHead(NULL);
     }
     delete[] oldArr;
 

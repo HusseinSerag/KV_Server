@@ -11,6 +11,7 @@ private:
     unsigned int size;
     const static float LOAD_FACTOR_THRESHOLD;
     void resize();
+    void unsafe_set(Node<K,V> * n);
 
 public:
     Hashtable(int capacity = 16);
@@ -24,7 +25,7 @@ public:
     int getCapacity();
     std::string table_toString();
     SinglyLinkedList<K, V>* getArr();
-    void unsafe_set(K key, V val);
+    
    
 
 };

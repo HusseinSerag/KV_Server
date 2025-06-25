@@ -38,6 +38,8 @@ class SinglyLinkedList {
         void appendToFront(K key, V val);
         Node<K,V>* search(K key);
         int deleteBySearch(K key);
+        void appendToFrontWithoutCreating(Node<K,V>* n);
+        void setHead(Node<K,V>* n);
 
 } ;
 
