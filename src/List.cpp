@@ -116,6 +116,9 @@ void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
                         } else if(cmd[i] == "ttl"){
                              if(i + 1 >= cmd.size()){
                                 throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+                            if(Helper::isNumber(cmd[i + 1]) != NumberKind::INTEGER){
+                                throw WrongCommandException("ttl value must be an integer!");
+                            }
                         }
                         ttl_index = i + 1;
                         i++;

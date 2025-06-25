@@ -32,8 +32,11 @@ Value** Storage::get(const std::string& key){
     if(exp != NULL){
         if(std::chrono::steady_clock::now() >= *exp){
             this->table->remove(key);
-            this->expires->remove(key);
-            write();
+
+            if(this->expires->remove(key)){
+                this->writeExpiry();
+            }
+            this->writeData();
             return NULL;
         }
     }
@@ -43,23 +46,35 @@ Value** Storage::get(const std::string& key){
 
 int Storage::remove(const std::string& key){
     int n = this->table->remove(key);
-    this->expires->remove(key);
+     if(this->expires->remove(key)){
+            this->writeExpiry();
+        }
+    this->writeData();
     return n;
 }
    void Storage::setTTL(const std::string& key, int ttl) {
-        if(ttl >= 0)
-        this->expires->set(key,std::chrono::steady_clock::now() + std::chrono::seconds(ttl));
-        else 
-        this->expires->remove(key);
+        if(ttl >= 0){
+
+            this->expires->set(key,std::chrono::steady_clock::now() + std::chrono::seconds(ttl));
+            this->writeExpiry();
+        }
+        else {
+
+           if( this->expires->remove(key)){
+            this->writeExpiry();
+           }
+        }
    }
 void Storage::set(const std::string& key, Value* val, int ttl){
     this->table->set(key,val);
+    this->writeData();
+
     setTTL(key,ttl);
 }
 Storage::Storage(){
 
     table = nullptr;
-    expires = new Hashtable<std::string,std::chrono::steady_clock::time_point>(16);
+    expires = nullptr;
 // try to load from disk first
 Config* config = Config::getInstance();
 // if persistence is on then read try to read from file
@@ -81,6 +96,8 @@ if(isEnabled) {
 
 if(!table)
 this->table = new Hashtable<std::string, Value*>(16);
+if(!expires)
+expires = new Hashtable<std::string,std::chrono::steady_clock::time_point>(16);
 
 }
 
@@ -90,6 +107,10 @@ Storage::~Storage() {
     if(table){
         delete table;
         table = nullptr;
+    }
+    if(expires){
+        delete expires;
+        expires = nullptr;
     }
 }
 
@@ -101,7 +122,7 @@ void Storage::deleteInstance() {
         }
 }
 
-void Storage::write(){
+void Storage::writeExpiry(){
     Config* config = Config::getInstance();
     
     if(isEnabled) {
@@ -111,16 +132,64 @@ void Storage::write(){
             std::filesystem::create_directories(filepath.parent_path());
         }
         std::ofstream out(filepath, std::ios::binary | std::ios::trunc);
-        this->save(out);
+        this->saveExpiry(out);
         out.close();
     }
 }
-void Storage::save(std::ostream& out) {
+void Storage::writeData(){
+    Config* config = Config::getInstance();
+    
+    if(isEnabled) {
+        const std::string& file = config->get("data_file");
+        std::filesystem::path filepath(file);
+        if(filepath.has_parent_path()){
+            std::filesystem::create_directories(filepath.parent_path());
+        }
+        std::ofstream out(filepath, std::ios::binary | std::ios::trunc);
+        this->saveData(out);
+        out.close();
+    }
+}
+
+void Storage::saveExpiry(std::ostream& out){
+    if(!out){
+            std::cerr << "Failed to open binary file.\n";
+            return;
+        }
+    //write expires
+
+   auto expires_arr = expires->getArr();
+   int capacity = expires->getCapacity();
+   out.write(reinterpret_cast<char*>(&capacity),sizeof(int));
+   // write capacity number of lists
+   for(int i = 0; i < capacity; i++){
+        auto *head = expires_arr[i].getHead();
+        // write len of linked list
+        int len = expires_arr[i].getSize();
+        out.write(reinterpret_cast<char *>(&len), sizeof(int));
+        while(head != NULL){
+             // write key then value
+      // write size [value] size [value]
+        const std::string& key = head->getKey();
+        size_t key_len = key.size();
+        out.write(reinterpret_cast<char*>(&key_len), sizeof(size_t));
+        out.write(key.c_str(), key_len);
+             std::chrono::steady_clock::time_point val = head->getValue();
+            size_t s = sizeof(val);
+            out.write(reinterpret_cast<char*>(&s), sizeof(size_t));
+            out.write(reinterpret_cast<char*>(&val),s);
+            head = head->getNext();
+        }
+
+   }
+}
+void Storage::saveData(std::ostream& out) {
 
         if(!out){
             std::cerr << "Failed to open binary file.\n";
             return;
         }
+      // write table  
    SinglyLinkedList<std::string, Value*>* arr = table->getArr();
    // write capacity of array
    int capacity = table->getCapacity();
@@ -147,9 +216,11 @@ void Storage::save(std::ostream& out) {
 
    }
 
+
 }
 
 void Storage::load(std::istream& in) {
+    // read table
 int capacity;
 in.read(reinterpret_cast<char *>(&capacity), sizeof(int));
 if(table) {
@@ -157,7 +228,7 @@ if(table) {
     table = nullptr;
 }
 table = new Hashtable<std::string, Value*>(capacity);
-SinglyLinkedList<std::string,Value*>* arr = table->getArr();
+//SinglyLinkedList<std::string,Value*>* arr = table->getArr();
 
 for(int i = 0; i < capacity; i++){
     int ll_len;
@@ -199,5 +270,38 @@ for(int i = 0; i < capacity; i++){
         j++;
     }
 }
+
+// read expiry
+in.read(reinterpret_cast<char *>(&capacity), sizeof(int));
+if(expires) {
+    delete expires;
+    expires = nullptr;
+}
+expires = new Hashtable<std::string,std::chrono::steady_clock::time_point>(capacity);
+
+for(int i = 0; i < capacity; i++){
+    int ll_len;
+    in.read(reinterpret_cast<char *>(&ll_len),sizeof(int));
+    int j = 0;
+    while(j < ll_len){
+        // read key and value and insert
+    size_t key_len;
+    in.read(reinterpret_cast<char *>(&key_len),sizeof(size_t));
+
+    std::string key(key_len, '\0');
+    in.read(&key[0],key_len);
+
+    // read value here based on tag
+    size_t size_of_time;
+    in.read(reinterpret_cast<char *>(&size_of_time),sizeof(size_of_time));
+
+    std::chrono::steady_clock::time_point val;
+    in.read(reinterpret_cast<char *>(&val),size_of_time);
+    expires->set(key, val);
+        j++;
+    }
+}
+
+
 
 }

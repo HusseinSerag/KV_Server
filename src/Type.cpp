@@ -130,24 +130,77 @@ void Type::isKeyValid(const std::string& key){
     return this->command;
  }
 
+void Type::parse_set(std::vector<std::string>& cmd, NumberKind& t) {
+       // do set command, only allowed in scalar not lists
+            // set key value [hint] ttl [ttl_value]
+            if(cmd.size() < 3 || cmd.size() > 6){
+                throw WrongCommandException("format is set [key] [value] ?[hint] ?[ttl [ttl_value]]!");
+            }
+            int ttl_index = -1;
+            int hint_index = -1;
+           
+            // enforce that keys cannot be command names or start with numbers and only start with
+            Type::isKeyValid(cmd[1]);
+            if(cmd[2] == "int" || cmd[2] == "double" || cmd[2] == "string" || cmd[2] == "ttl"){
+                throw WrongCommandException("format is set [key] [value] ?[hint] ?[ttl [ttl_value]]!");
+            }
+            for(int i = 3; i < cmd.size();i++){
+                if(cmd[i] == "int" || cmd[i] == "double" || cmd[i] == "string"){
+                    hint_index = i;
+                } else if(cmd[i] == "ttl"){
+                    if(i + 1 >= cmd.size()){
+                                    throw WrongCommandException("format is set [key] [value] ?[hint] ?[ttl [ttl_value]]!");
+                            if(Helper::isNumber(cmd[i + 1]) != NumberKind::INTEGER){
+                                throw WrongCommandException("ttl value must be an integer!");
+                            }
+                        }
+                        ttl_index = i + 1;
+                        i++;
+                } else {
+                         throw WrongCommandException("format is set [key] [value] ?[hint] ?[ttl [ttl_value]]!");
+                }
+            }
+            std::string &value = cmd[2];
+            // here there is a key and value and maybe a hint yes or no
+            
+             t = Helper::isNumber(value);
+            if(hint_index != -1){
+                // try parsing and create correct type
+                // check for type based on hint
+               std::string& hint = cmd[hint_index];
+                if(hint != "int" && hint != "double" && hint != "string"){
+                    throw WrongCommandException("hint is only string, int, or double!");
+                    
+                }
+                if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
+                    throw WrongCommandException("type mismatch! Couldn't convert to a number type");
+                }
+
+                 if(hint == "int"){
+                    t = NumberKind::INTEGER;
+                } else if(hint == "double"){
+                    t = NumberKind::DOUBLE;
+                } else {
+                    t = NumberKind::NOT_NUMBER;
+                }
+                cmd.erase(cmd.begin() + hint_index);
+            }
+ }
 
 //  void Type::parse_set(std::vector<std::string>& cmd, NumberKind& t) {
-//         // also accept ttl ttl <number>
 //        // do set command, only allowed in scalar not lists
-//             if(cmd.size() < 3){
-//                 throw WrongCommandException("format is set [key] [value] ?[hint] ?(ttl [ttl_seconds])!");
+//             // set key value [hint] ttl [ttl_value]
+//             if(cmd.size() < 3 || cmd.size() > 4){
+//                 throw WrongCommandException("format is set [key] [value] ?[hint]!");
 //             }
 //             // enforce that keys cannot be command names or start with numbers and only start with
 //             Type::isKeyValid(cmd[1]);
 //             std::string hint = "", &value = cmd[2];
 //             // here there is a key and value and maybe a hint yes or no
-//             if(cmd.size() >= 4){
-//             // can be hint
-//             if(cmd[3] == "string" || cmd[3] == "int" || cmd[3] == "double"){
-//                 // there exist a hint
+//             if(cmd.size() == 4){
 //                 hint = cmd[3];
 //             }
-//             t = Helper::isNumber(value);
+//              t = Helper::isNumber(value);
 //             if(!(hint == "")){
 //                 // try parsing and create correct type
 //                 // check for type based on hint
@@ -168,46 +221,4 @@ void Type::isKeyValid(const std::string& key){
 //                 }
 //                 cmd.erase(cmd.begin() + 3);
 //             }
-
-//             // check for ttl here 
-//             if(cmd.size() != 5 || (cmd[3] != "ttl") || NumberKind::INTEGER != Helper::isNumber(cmd[4]) ){
-//                   throw WrongCommandException("format is set [key] [value] ?[hint] ?(ttl [ttl_seconds])!");
-//             }
-           
-//         }
 //  }
-
- void Type::parse_set(std::vector<std::string>& cmd, NumberKind& t) {
-       // do set command, only allowed in scalar not lists
-            if(cmd.size() < 3 || cmd.size() > 4){
-                throw WrongCommandException("format is set [key] [value] ?[hint]!");
-            }
-            // enforce that keys cannot be command names or start with numbers and only start with
-            Type::isKeyValid(cmd[1]);
-            std::string hint = "", &value = cmd[2];
-            // here there is a key and value and maybe a hint yes or no
-            if(cmd.size() == 4){
-                hint = cmd[3];
-            }
-             t = Helper::isNumber(value);
-            if(!(hint == "")){
-                // try parsing and create correct type
-                // check for type based on hint
-                if(hint != "int" && hint != "double" && hint != "string"){
-                    throw WrongCommandException("hint is only string, int, or double!");
-                    
-                }
-                if((hint == "int" || hint == "double") && t == NumberKind::NOT_NUMBER ){
-                    throw WrongCommandException("type mismatch! Couldn't convert to a number type");
-                }
-
-                 if(hint == "int"){
-                    t = NumberKind::INTEGER;
-                } else if(hint == "double"){
-                    t = NumberKind::DOUBLE;
-                } else {
-                    t = NumberKind::NOT_NUMBER;
-                }
-                cmd.erase(cmd.begin() + 3);
-            }
- }
