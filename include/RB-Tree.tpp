@@ -394,7 +394,7 @@ template <typename T>
       int RedBlackTree<T>::remove(T val) {
          RBNode<T>* toDelete = search(val);
          RBNode<T>* n = _remove(toDelete);
-         if(n){
+         if(n != NIL){
             delete n;
             return 1;
          }

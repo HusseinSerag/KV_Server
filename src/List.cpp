@@ -87,21 +87,43 @@ void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
                     // ladd x 3 234 42 sf int can add several values and a hint 
                     // go until we find hint or ttl
 
+                    // either at end or before ttl
+                    // string ttl 3
+                    // ttl 3 string
                     int hint_index = -1;
                     int ttl_index = -1;
-                    // give atleast one value
-                    for(int i = 3; i < cmd.size(); i++){
-                        if(cmd[i] == "string" || cmd[i] == "double" || cmd[i] == "int"){
-                            // we found hint
-                            if(hint_index != -1) throw WrongCommandException("Cannot have several type hints at once!");
-                            hint_index = i;
-                        } else if(cmd[i] == "ttl"){
-                            if(i + 1 >= cmd.size()){
-                                throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
-                            }
-                            ttl_index = i + 1;
+                    int config_index = -1;
+                    bool valuePassed = false;
+                     
+                    
+                    for(int i = 2; i < cmd.size();i++){
+
+                        if(cmd[i] == "ttl" || cmd[i] == "string" || cmd[i] == "double" || cmd[i] == "int"){
+                            config_index = i;
+                            break;
+                        } else {
+                            valuePassed = true;
                         }
                     }
+                   if(!valuePassed && config_index != -1){
+                    throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+                   }
+                    if(config_index != -1) {
+                        for(int i = config_index; i < cmd.size();i++){
+                            if(cmd[i] == "string" || cmd[i] == "double" || cmd[i] == "int"){
+                                if(hint_index != -1) throw WrongCommandException("Cannot have several type hints at once!");
+                            hint_index = i;
+                        } else if(cmd[i] == "ttl"){
+                             if(i + 1 >= cmd.size()){
+                                throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+                        }
+                        ttl_index = i + 1;
+                        i++;
+                        } else {
+                            throw WrongCommandException("hformat is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+                        }
+                    }
+                }
                     
                   
                           if(hint_index == -1){
