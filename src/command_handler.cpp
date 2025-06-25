@@ -67,7 +67,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
                 }
                
             std::string text;
-            text.reserve(nstr);
+            text.reserve(len);
             if(!Helper::read_str(request,end,len, text)){
                throw MalformedMessageException();
             }
@@ -183,6 +183,8 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
             catch(const BaseException& e){
                 res.output = e.what();
                 res.status = e.getResponse();
+
+                if(type){ delete type; type = nullptr; }
                 
             }
             

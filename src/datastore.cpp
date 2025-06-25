@@ -15,6 +15,7 @@
 #include "Value.h"
 #include "StringListValue.h"
 #include "NumberListValue.h"
+#include "chrono"
 Storage* Storage::instance = nullptr;
 
 Storage* Storage::getInstance() {
@@ -28,16 +29,35 @@ Value** Storage::get(const std::string& key){
     Value** val = this->table->get(key);
     if(val == NULL) return val;
     std::chrono::steady_clock::time_point* exp = this->expires->get(key);
-    if(exp == NULL){
-        return val;
-    } 
-    this->table->remove(key);
+    if(exp != NULL){
+        if(std::chrono::steady_clock::now() >= *exp){
+            this->table->remove(key);
+            this->expires->remove(key);
+            return NULL;
+        }
+    }
+    return val; 
+   
+}
+
+int Storage::remove(const std::string& key){
+    int n = this->table->remove(key);
     this->expires->remove(key);
-    return NULL;
+    return n;
+}
+
+void Storage::set(const std::string& key, Value* val, int ttl){
+    this->table->set(key,val);
+    if(ttl >= 0){
+        this->expires->set(key,std::chrono::steady_clock::now() + std::chrono::seconds(ttl));
+    } else {
+        this->expires->remove(key);
+    }
 }
 Storage::Storage(){
 
     table = nullptr;
+    expires = new Hashtable<std::string,std::chrono::steady_clock::time_point>(16);
 // try to load from disk first
 Config* config = Config::getInstance();
 // if persistence is on then read try to read from file

@@ -4,6 +4,7 @@
 #include "hashtable.h"
 #include "Value.h"
 #include "Serializable.h"
+#include "chrono"
 
 
 // implement singeleton pattern for storage
@@ -21,6 +22,8 @@ class Storage: public Serializable {
     static void deleteInstance();
     void write();
     Value** get(const std::string& key);
+    int remove(const std::string& key);
+    void set(const std::string& key, Value* val, int ttl = -1);
 
 };
 

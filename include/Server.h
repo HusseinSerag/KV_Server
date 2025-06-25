@@ -20,7 +20,7 @@ class Server {
      static void fd_set_nb(int fd);
     static const size_t k_max_msg;
     friend class Connection;
-    friend void handle_sigint(int signal);
+    friend void handle_sig(int signal);
 
 
 

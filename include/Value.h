@@ -18,7 +18,7 @@ class Value {
         static Value* get(std::string& key);
         static void del(std::string& key);
         template <typename T,typename V>
-        static void set(std::string& key, V value);
+        static void set(std::string& key, V value,int ttl = -1);
         virtual enum ValueType getType() = 0;
         static bool isListType(ValueType& type);
         

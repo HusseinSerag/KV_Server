@@ -13,6 +13,16 @@ import datetime
 import logger
 
 # --- Random Generators ---
+def generate_set_command():
+    key = random_string()
+    value_type = random.choice(["int", "double", "string"])
+    if value_type == "int":
+        value = random_int()
+    elif value_type == "double":
+        value = random_double()
+    else:
+        value = random_string()
+    return ["set", key, value]
 
 def random_string(length=5):
     return ''.join(random.choices(string.ascii_letters, k=length))
@@ -147,5 +157,83 @@ def run_test(n=1000):
     process.join()
     print("Test done, check results")
 
+
+BATCH_SIZE = 100
+def handle_batch(commands, results, cb, timings):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((HOST, PORT))
+            for cmd in commands:
+                msg = parse_command(cmd)
+                if not msg:
+                    continue
+                try:
+                    start = time.time()
+                    send_all(s, msg)
+                    parse_resp(s, cb)
+                    elapsed = time.time() - start
+                    timings.append(elapsed)
+                    results["success"] += 1
+                except Exception as e:
+                    cb(f"Error handling command {cmd}: {e}")
+                    results["fail"] += 1
+    except Exception as e:
+        cb(f"Socket failed for batch: {e}")
+        results["fail"] += len(commands)
+
+def run_test_set(total_commands=1000):
+    print("Testing SET only with batching (socket reuse)...")
+    base_dir = "tests"
+    os.makedirs(base_dir, exist_ok=True)
+
+    dir_name = os.path.join(base_dir, f"test_{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S%z')}")
+    os.makedirs(dir_name)
+    process = multiprocessing.Process(target=run_server, args=(os.path.join(dir_name, "server.output.log"),))
+    process.start()
+    time.sleep(5)
+
+    results = {"success": 0, "fail": 0}
+    timings = []
+    client_logger = logger.setup_logger("client_logger", os.path.join(dir_name, "client.output.log"))
+
+    start_time = time.time()
+
+    threads = []
+    for i in range(0, total_commands, BATCH_SIZE):
+        batch = [generate_set_command() for _ in range(min(BATCH_SIZE, total_commands - i))]
+        t = threading.Thread(
+            target=handle_batch,
+            name=f"Batch-{i // BATCH_SIZE}",
+            args=(batch, results, lambda msg: client_logger.info("%s", msg.replace("%", " ")), timings)
+        )
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    duration = time.time() - start_time
+
+    if timings:
+        avg_latency = sum(timings) / len(timings)
+        max_latency = max(timings)
+        min_latency = min(timings)
+    else:
+        avg_latency = max_latency = min_latency = 0
+
+    with open(os.path.join(dir_name, "results.txt"), "w") as f:
+        f.write("Load Test (SET-only, Batching w/ socket reuse) Complete\n")
+        f.write(f"Success: {results['success']}\n")
+        f.write(f"Failures: {results['fail']}\n")
+        f.write(f"Total Time: {duration:.2f}s\n")
+        f.write(f"Average Time per Command (wall): {duration / total_commands:.5f}s\n")
+        f.write(f"Average Latency per Command (per-thread): {avg_latency:.5f}s\n")
+        f.write(f"Max Latency: {max_latency:.5f}s\n")
+        f.write(f"Min Latency: {min_latency:.5f}s\n")
+
+    os.kill(process.pid, signal.SIGTERM)
+    process.join()
+    print("Test complete. Results saved.")
+
 if __name__ == "__main__":
-    run_test(50000)
+    run_test_set(100000)

@@ -26,6 +26,7 @@ protected:
     std::string command;
     std::string key;
     Value* val;
+    int ttl;
     
     public:
     static enum Generic::GenericCommands _parseCommand(const std::string& command);

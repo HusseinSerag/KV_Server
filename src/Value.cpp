@@ -9,7 +9,7 @@
 
 void Value::del(std::string& key) {
     Storage* storage = Storage::getInstance();
-    if (!storage->table->remove(key))
+    if (!storage->remove(key))
     throw NotFoundException();
 }
 Value* Value::get(std::string& key) {

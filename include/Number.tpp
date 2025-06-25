@@ -30,13 +30,13 @@ int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
     if(command.size() < 2){
         throw WrongCommandException("atleast a command and key required!" );
     }
-    if(command.size() > 3) {// error 
+    enum NumberCommand cmd = parseCommand(this->command);
+    if(command.size() > 3 && cmd != NumberCommand::SET) {// error 
        // throw error
         throw WrongCommandException("invalid command!" );
     }
     this->command = command[0];
     this->key = command[1];
-    enum NumberCommand cmd = parseCommand(this->command);
     if(cmd == NumberCommand::DEC || cmd == NumberCommand::INC){
         if(command.size() == 3 && Helper::isNumber(command[2]) == NumberKind::NOT_NUMBER){
              throw WrongCommandException("Value provided must be a number!");
@@ -52,6 +52,10 @@ int8_t Number<T>::read(std::vector<std::string> & command, Response& res) {
         }
         this->value = std::stod(command[2]);
     }
+
+    if(cmd == NumberCommand::SET){
+        this->ttl = std::stoi(command[4]);
+   }
     
     
     return 1;
@@ -85,7 +89,7 @@ void Number<T>::execute(Storage* storage, Response& res) {
             case NumberCommand::SET: {
 
                 Value* val = new NumberValue<T>(value);
-                storage->table->set(key, val);
+                storage->set(key, val,this->ttl);
 
                 res.output = "OK";
                 break;

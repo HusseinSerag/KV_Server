@@ -21,10 +21,7 @@
     };
   
 
-    
-   
- 
-void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
+    void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
    // first make sure there is atleast 3 strings
                     if(cmd.size() < 3){
                         throw WrongCommandException("format is ladd [key] ...[values] ?[hint]!");
@@ -73,6 +70,89 @@ void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
                         
                         }
 }
+
+
+
+
+    // ladd x 1 2 3 4 string ttl 120
+   // capture values from 3rd strings till we find ttl or string
+ // ladd x string string
+// void List::parse_add(std::vector<std::string>& cmd, NumberKind& t){
+//    // first make sure there is atleast 3 strings
+//                     if(cmd.size() < 3){
+//                         throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+//                     }
+//                     // enforce that keys cannot be command names or start with numbers and only start with
+//                     Type::isKeyValid(cmd[1]);
+//                     // ladd x 3 234 42 sf int can add several values and a hint 
+//                     // go until we find hint or ttl
+
+//                     int hint_index = -1;
+//                     int ttl_index = -1;
+//                     for(int i = 3; i < cmd.size(); i++){
+//                         if(cmd[i] == "string" || cmd[i] == "double" || cmd[i] == "int"){
+//                             // we found hint
+//                             hint_index = i;
+//                         } else if(cmd[i] == "ttl"){
+//                             if(i + 1 >= cmd.size()){
+//                                 throw WrongCommandException("format is ladd [key] ...[values] ?[hint] ?ttl [ttl_seconds]!");
+//                             }
+//                             ttl_index = i + 1;
+//                         }
+//                     }
+                  
+//                           if(hint_index != -1){
+//                         // no type hint try parsing and check all is correct type
+//                         // based on first value type we expect this time for the rest
+//                          t = Helper::isNumber(cmd[2]);
+//                         // if it is a number then make sure we store numbers too
+//                         int bounds = ttl_index != -1 ? ttl_index : cmd.size();
+//                         if(t != NumberKind::NOT_NUMBER){
+//                             for(int i = 3; i < bounds ; i++){
+//                                 const std::string& m =  t == NumberKind::DOUBLE ? "double" : "integer";
+//                                 if(cmd[i] == "string" || cmd[i] == "int" || cmd[i] == "double") WrongCommandException("Cannot store a non number value to a [" + m + "] list!" );
+//                                 NumberKind cand = Helper::isNumber(cmd[i]);
+//                                 if(cand != t && cand == NumberKind::NOT_NUMBER){ 
+//                                     const std::string& m = (t == NumberKind::DOUBLE ? "double" : "integer");
+//                                     throw WrongCommandException("Cannot store a non number value to a [" + m + "] list!" );
+//                                 }
+//                             }
+//                         } else {
+//                             for(int i = 2; i < bounds; i++){
+
+//                                 if(cmd[i] == "string" || cmd[i] == "int" || cmd[i] == "double") WrongCommandException("Format specifier can only be at end of command!");
+//                             }
+//                         }
+//                         // here we have made sure all have the same type and we have the type
+                         
+//                     } else {
+//                         // we have a hint at the end
+//                         // make sure no format specifier anywhere else
+//                         std::string& hint = cmd[hint_index];
+
+//                         for(int i = 2; i < hint_index; i++){
+//                                 if(cmd[i] == "string" || cmd[i] == "int" || cmd[i] == "double") WrongCommandException("Format specifier can only be at end of command!");
+//                         }
+//                         t = hint == "int" ? NumberKind::INTEGER : hint == "double" ? NumberKind::DOUBLE : NumberKind::NOT_NUMBER;
+//                         // if hint is specified make sure if hint is number then we supply numbers
+//                         for(int i = 2; i < hint_index; i++){
+//                             if(Helper::isNumber(cmd[i]) == NumberKind::NOT_NUMBER && t != NumberKind::NOT_NUMBER ){
+//                             throw WrongCommandException("type mismatch! Couldn't convert to a number type");
+//                         }
+//                     }
+//                    cmd.erase(cmd.begin() + hint_index);
+                        
+//             }
+//             if(ttl_index != -1){
+//                 if(Helper::isNumber(cmd[ttl_index]) != NumberKind::INTEGER){
+//                     throw WrongCommandException("TTL value must be an integer");
+//                 }
+//             }
+
+
+            
+//     }
+                
 
 
 

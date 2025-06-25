@@ -30,7 +30,15 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
         this->key = request[1];
         hasIndex = false;
         if(cmd == ListC::LADD){
+            
             for(int i = 2; i < request.size(); i++){
+                if(request[i] == "ttl"){
+                    if(i + 1 >= request.size()){
+                         throw WrongCommandException("format is ladd key [values.....] ?[hint] ?ttl [ttl_seconds] !");
+                    }
+                    this->ttl = std::stod(request[i + 1]);
+                    break;
+                }
                 values.push_back(parseValue<T>(request[i]));
             }
         }
@@ -109,7 +117,7 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
                if(v == NULL){
                 // no list so override
                 list = new L();
-                storage->table->set(key,list);
+                storage->set(key,list,this->ttl);
                } else {
                 val = *v;
                 ValueType t = (val)->getType();
@@ -117,7 +125,7 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
                    if(!Value::isListType(t)){
                     // this isnt a list we can override 
                         list = new L();
-                        storage->table->set(key,list);
+                        storage->set(key,list,this->ttl);
                    } else {
                     // list with maybe wrong type so we check
                     L l;

@@ -17,7 +17,7 @@ void cleanup() {
     Config::deleteInstance();
     Logger::close();
 }
-void handle_sigint(int signal) {
+void handle_sig(int signal) {
 
 
         Server::should_exit = true;
@@ -26,7 +26,8 @@ void handle_sigint(int signal) {
 
 }
 int main(int argc, char* argv[]) {
-    std::signal(SIGINT, handle_sigint);
+    std::signal(SIGINT, handle_sig);
+    std::signal(SIGABRT,handle_sig);
     Server server;
     Config* config = Config::getInstance();
    if(!config->setup(argv + 1,  argc - 1)){

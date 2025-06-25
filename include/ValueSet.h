@@ -6,9 +6,9 @@
 
 
 template <typename T, typename V>
-void Value::set(std::string& key, V value) {
+void Value::set(std::string& key, V value, int ttl) {
     Storage* storage = Storage::getInstance();
     Value* val = new T(value);
-    storage->table->set(key, val);
+    storage->set(key, val,ttl);
 
 }

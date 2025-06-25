@@ -36,6 +36,7 @@ std::atomic<bool> Server::should_exit(false);
         int rv = bind(this->accepting_fd, (const sockaddr*)&addr, sizeof(addr));
 
         if(rv){
+            perror("bind failed");
             Helper::die("bind()");
         }
 
@@ -43,6 +44,7 @@ std::atomic<bool> Server::should_exit(false);
 
         rv = listen(accepting_fd, SOMAXCONN);
         if(rv){
+              perror("listen failed");
             Helper::die("listen()");
         }
     }

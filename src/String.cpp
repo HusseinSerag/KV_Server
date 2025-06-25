@@ -25,19 +25,21 @@ int8_t String::read(std::vector<std::string> &request, Response& res)  {
    if(request.size() < 2){
         throw WrongCommandException("atleast a command and key required!" );
     }
-    if(request.size() > 3){
-        
+    enum Str::StringCommand cmd = parseCommand(this->command);
+    if(request.size() > 3 && cmd != Str::StringCommand::SET){
         throw WrongCommandException("Invalid command!");
-    
     }
    this->command = request[0];
    this->key = request[1];
-   enum Str::StringCommand cmd = parseCommand(this->command);
    if((cmd == Str::StringCommand::SET || cmd == Str::StringCommand::CONCAT ) && request.size() == 2){
       throw WrongCommandException("format is " + this->command + " [key] [value] " + ((this->command == "set") ? "?[hint]" : "") );
    } 
    if(cmd != Str::StringCommand::LENGTH && cmd != Str::StringCommand::UNKNOWN)
     this->value = request[2];
+
+   if(cmd == Str::StringCommand::SET){
+        this->ttl = std::stoi(request[4]);
+   }
    
    return 1;
 }
@@ -66,7 +68,7 @@ void String::execute(Storage* storage, Response& res) {
     
         switch(parseCommand(command)) {
             case Str::StringCommand::SET: {
-                Value::set<StringValue, std::string>(key,value);
+                Value::set<StringValue, std::string>(key,value,this->ttl);
                 res.output = "OK";
                 break;
             }
