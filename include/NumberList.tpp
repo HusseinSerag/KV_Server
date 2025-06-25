@@ -26,7 +26,6 @@ void NumberList<T>::execute(Storage* storage, Response& res) {
         try{
         switch (List::parseCommand(this->command))
         {
-        
             case ListC::EXECUTE:
             break;
             default:

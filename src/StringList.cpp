@@ -30,39 +30,7 @@ int8_t StringList::read(std::vector<std::string>& request, Response& res){
         try{
         switch (List::parseCommand(this->command))
         {
-        // case ListC::LADD:{
-        //         StringListValue* list = NULL;
-        //        if(val == NULL){
-        //         // no list so override
-        //          list = new StringListValue();
-        //         storage->table->set(key,list);
-        //        } else {
 
-        //         ValueType t = val->getType();
-        //           // if list then we know its a list
-        //            if(!Value::isListType(t)){
-        //             // this isnt a list we can override 
-        //                 list = new StringListValue();
-        //                 storage->table->set(key,list);
-        //            } else {
-        //             // list with maybe wrong type so we check
-                   
-        //             if(!val->getType() != ValueType::LIST_STRING){
-        //                 // error
-        //                 throw TypeMismatchException(this->command, "list of strings");  
-        //             } else {
-        //                 list = (StringListValue* )val;
-        //             }
-        //            }
-        //         }
-        //         // dynamic cast
-        //         for(int i = 0; i < values.size(); i++){
-        //            //insert
-        //            ListValue::insert<StringValue *>(new StringValue(values[i]), list->getValue());
-        //         }
-        //         res.output = "OK";
-        //     break;   
-        // }
         case ListC::EXECUTE:
         break;
         default:

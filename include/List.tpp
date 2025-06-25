@@ -33,9 +33,9 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
             
             for(int i = 2; i < request.size(); i++){
                 if(request[i] == "ttl"){
-                    if(i + 1 >= request.size()){
-                         throw WrongCommandException("format is ladd key [values.....] ?[hint] ?ttl [ttl_seconds] !");
-                    }
+                    // if(i + 1 >= request.size()){
+                    //      throw WrongCommandException("format is ladd key [values.....] ?[hint] ?ttl [ttl_seconds] !");
+                    // }
                     this->ttl = std::stod(request[i + 1]);
                     break;
                 }
@@ -134,6 +134,7 @@ void List::read(std::vector<std::string>& request, std::vector<T>& values,enum L
                         throw TypeMismatchException(this->command, "wrong type");  
                     } else {
                         list = (L* )(val);
+                        storage->setTTL(key,ttl);
                     }
                    }
                 }

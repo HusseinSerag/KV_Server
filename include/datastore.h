@@ -24,6 +24,7 @@ class Storage: public Serializable {
     Value** get(const std::string& key);
     int remove(const std::string& key);
     void set(const std::string& key, Value* val, int ttl = -1);
+    void setTTL(const std::string& key, int ttl);
 
 };
 

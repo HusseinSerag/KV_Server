@@ -33,6 +33,7 @@ Value** Storage::get(const std::string& key){
         if(std::chrono::steady_clock::now() >= *exp){
             this->table->remove(key);
             this->expires->remove(key);
+            write();
             return NULL;
         }
     }
@@ -45,14 +46,15 @@ int Storage::remove(const std::string& key){
     this->expires->remove(key);
     return n;
 }
-
+   void Storage::setTTL(const std::string& key, int ttl) {
+        if(ttl >= 0)
+        this->expires->set(key,std::chrono::steady_clock::now() + std::chrono::seconds(ttl));
+        else 
+        this->expires->remove(key);
+   }
 void Storage::set(const std::string& key, Value* val, int ttl){
     this->table->set(key,val);
-    if(ttl >= 0){
-        this->expires->set(key,std::chrono::steady_clock::now() + std::chrono::seconds(ttl));
-    } else {
-        this->expires->remove(key);
-    }
+    setTTL(key,ttl);
 }
 Storage::Storage(){
 
