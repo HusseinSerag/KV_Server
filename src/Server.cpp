@@ -125,8 +125,8 @@ std::atomic<bool> Server::should_exit(false);
     }
     Server::fd_set_nb(connfd);
     uint32_t ip = client.sin_addr.s_addr;
-    fprintf(stdout, "new client connected from %u.%u.%u.%u:%u\n",
-    ip & 255, (ip >> 8) & 255, (ip >> 16) & 255, (ip >> 24),ntohs(client.sin_port));
+//    fprintf(stdout, "new client connected from %u.%u.%u.%u:%u\n",
+//     ip & 255, (ip >> 8) & 255, (ip >> 16) & 255, (ip >> 24),ntohs(client.sin_port));
     Connection *connection = new Connection(connfd);
     return connection;
 

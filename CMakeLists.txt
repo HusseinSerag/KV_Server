@@ -12,7 +12,7 @@ endif()
 
 # Set highly optimized flags for Release build
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -fno-plt -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -DNDEBUG")
 endif()
 
 # Globally enable Link Time Optimization (LTO)
@@ -28,5 +28,5 @@ add_executable(client_exec
 )
 
 # Server target (grabs all .cpp files from src/ and shared/)
-file(GLOB SERVER_SRC "src/*.cpp" "shared/*.cpp" "shared/exception/*.cpp")
+file(GLOB SERVER_SRC "src/*.cpp" "shared/*.c*" "shared/exception/*.cpp")
 add_executable(server_exec ${SERVER_SRC})

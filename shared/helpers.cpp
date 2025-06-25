@@ -41,16 +41,7 @@ std::string Helper::getCurrentTimestamp() {
         return true;
     }
 
-    unsigned int Helper::DJBHash(const char* str, unsigned int length){
-        unsigned int hash = 5381;
-        unsigned int i = 0;
-        for(i = 0; i < length; ++str, ++i)
-        {
-            hash = ((hash << 5) + hash) + (*str);
-        }
-        return hash;
-    }
-
+   
 
      std::string Helper::deque_to_string(std::deque<std::string>& dq) {
 

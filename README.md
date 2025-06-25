@@ -132,7 +132,7 @@ python3 main.py
 
 ## 🧪 Load Testing
 
-The `script/main.py` simulates multiple clients performing rapid operations to benchmark the server. On a local test, the server handled **13,000 `SET` operations** per second.
+The `script/main.py` simulates multiple clients performing rapid operations to benchmark the server. On a local test, the server handled **19,000 `SET` operations** per second.
 
 ---
 

@@ -12,6 +12,10 @@ private:
     const static float LOAD_FACTOR_THRESHOLD;
     void resize();
     void unsafe_set(Node<K,V> * n);
+    // Algorithm produced by Professor Daniel J. Bernstein
+    unsigned int DJBHash(const char* str, unsigned int length);
+    unsigned hash(const char* str, unsigned int length);
+
 
 public:
     Hashtable(int capacity = 16);

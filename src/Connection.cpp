@@ -64,7 +64,7 @@ void Connection::handle_read() {
     }
 
     if (rv == 0) {
-        Helper::msg(incoming_.size() == 0 ? "client closed" : "unexpected EOF");
+     //   Helper::msg(incoming_.size() == 0 ? "client closed" : "unexpected EOF");
         want_close_ = true;
         return;
     }

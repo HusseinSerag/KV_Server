@@ -5,10 +5,11 @@
 #include <string>
 #include <deque>
 #include <cstddef>
+#include "xxhash.h"
 
 
 template <typename K, typename V>
-const float Hashtable<K,V>::LOAD_FACTOR_THRESHOLD = 0.75f;
+const float Hashtable<K,V>::LOAD_FACTOR_THRESHOLD = 0.70f;
 template <typename K, typename V>
 Hashtable<K, V>::Hashtable(int capacity) {
     this->capacity = capacity > 0 ? Helper::nextPower2((size_t)capacity) : 16;
@@ -31,10 +32,28 @@ Hashtable<K, V>::~Hashtable() {
 }
 delete[] arr;  
 }
+
+template<typename K, typename V>
+ unsigned int Hashtable<K,V>::DJBHash(const char* str, unsigned int length){
+        unsigned int hash = 5381;
+        unsigned int i = 0;
+        for(i = 0; i < length; ++str, ++i)
+        {
+            hash = ((hash << 5) + hash) + (*str);
+        }
+        return hash;
+    }
+
+    template<typename K,typename V>
+    unsigned int Hashtable<K,V>::hash(const char* str, unsigned int length){
+        return XXH3_64bits(str, length);
+
+    }
+
 template<typename K, typename V>
 void Hashtable<K,V>::unsafe_set(Node<K,V> * n) {
     
-    int ind = Helper::DJBHash(n->getKey().c_str(), n->getKey().size()) & (this->capacity - 1);
+    int ind = hash(n->getKey().c_str(), n->getKey().size()) & (this->capacity - 1);
     arr[ind].appendToFrontWithoutCreating(n);
     size++;
 }
@@ -62,7 +81,7 @@ void Hashtable<K,V>::resize() {
 }
 template <typename K, typename V>
 void Hashtable<K, V>::set(K key, V val) {
-    int ind = Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1); // Replace this with proper hashing in future
+    int ind = hash(key.c_str(), key.size()) & (this->capacity - 1); // Replace this with proper hashing in future
     SinglyLinkedList<K, V>& l = arr[ind];
 
     Node<K, V>* node = l.search(key);
@@ -83,7 +102,7 @@ void Hashtable<K, V>::set(K key, V val) {
 
 template <typename K, typename V>
 V* Hashtable<K, V>::get(K key) {
-    int ind =  Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
+    int ind =  hash(key.c_str(), key.size()) & (this->capacity - 1);
     SinglyLinkedList<K, V>& l = arr[ind];
     Node<K, V>* node = l.search(key);
     if (node != NULL) {
@@ -94,7 +113,7 @@ V* Hashtable<K, V>::get(K key) {
 
 template <typename K, typename V>
 int Hashtable<K, V>::remove(K key) {
-    int ind =  Helper::DJBHash(key.c_str(), key.size()) & (this->capacity - 1);
+    int ind =  hash(key.c_str(), key.size()) & (this->capacity - 1);
     SinglyLinkedList<K, V>& l = arr[ind];
     int res = l.deleteBySearch(key);
     if (res) size--;
