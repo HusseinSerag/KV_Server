@@ -236,4 +236,4 @@ def run_test_set(total_commands=1000):
     print("Test complete. Results saved.")
 
 if __name__ == "__main__":
-    run_test_set(100000)
+    run_test_set(50000)

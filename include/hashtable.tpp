@@ -6,10 +6,19 @@
 #include <deque>
 #include <cstddef>
 #include "xxhash.h"
+#include <shared_mutex>
+#include <mutex>
 
 
 template <typename K, typename V>
 const float Hashtable<K,V>::LOAD_FACTOR_THRESHOLD = 0.70f;
+
+
+template <typename K, typename V>
+int Hashtable<K, V>::getLockIndex(const K& key) {
+    return hash(key.c_str(), key.size()) % NUM_LOCKS;
+}
+
 template <typename K, typename V>
 Hashtable<K, V>::Hashtable(int capacity) {
     this->capacity = capacity > 0 ? Helper::nextPower2((size_t)capacity) : 16;
@@ -59,7 +68,13 @@ void Hashtable<K,V>::unsafe_set(Node<K,V> * n) {
 }
 template<typename K, typename V>
 void Hashtable<K,V>::resize() {
+      std::unique_lock resizeGuard(resizeMutex);
 
+        std::array<std::unique_lock<std::shared_mutex>,NUM_LOCKS> lockGuards;
+     for(int i = 0; i < NUM_LOCKS; i++){
+         lockGuards[i] = std::unique_lock(locks[i]);
+     }
+    
     SinglyLinkedList<K, V>* oldArr = arr;
     int oldCap = capacity;
     capacity *= 2;
@@ -81,27 +96,41 @@ void Hashtable<K,V>::resize() {
 }
 template <typename K, typename V>
 void Hashtable<K, V>::set(K key, V val) {
-    int ind = hash(key.c_str(), key.size()) & (this->capacity - 1); // Replace this with proper hashing in future
-    SinglyLinkedList<K, V>& l = arr[ind];
+    bool shouldResize = false;
+   {   
+         std::shared_lock resizeGuard(resizeMutex);
+         int lockIndex = getLockIndex(key);
+         std::unique_lock lock(locks[lockIndex]);
+    
 
-    Node<K, V>* node = l.search(key);
+        int ind = hash(key.c_str(), key.size()) & (this->capacity - 1); 
+        SinglyLinkedList<K, V>& l = arr[ind];
 
-    if (node != NULL) {
-        if constexpr (std::is_pointer_v<V>) {
-            delete node->getValue();
-        } 
-        node->setValue(val);
-    } else {
-        l.appendToFront(key, val);
-        size++;
-        if((float) size / capacity > LOAD_FACTOR_THRESHOLD) {
-            resize();
+        Node<K, V>* node = l.search(key);
+
+        if (node != NULL) {
+            if constexpr (std::is_pointer_v<V>) {
+                delete node->getValue();
+            } 
+            node->setValue(val);
+        } else {
+            l.appendToFront(key, val);
+            size++;
+            if((float) size / capacity > LOAD_FACTOR_THRESHOLD) {
+                shouldResize = true;
+            }
         }
+    }
+    if(shouldResize){
+        resize();
     }
 }
 
 template <typename K, typename V>
 V* Hashtable<K, V>::get(K key) {
+     std::shared_lock resizeGuard(resizeMutex);
+     int lockIndex = getLockIndex(key);
+     std::shared_lock lock(locks[lockIndex]);
     int ind =  hash(key.c_str(), key.size()) & (this->capacity - 1);
     SinglyLinkedList<K, V>& l = arr[ind];
     Node<K, V>* node = l.search(key);
@@ -114,6 +143,9 @@ V* Hashtable<K, V>::get(K key) {
 template <typename K, typename V>
 int Hashtable<K, V>::remove(K key) {
     int ind =  hash(key.c_str(), key.size()) & (this->capacity - 1);
+     std::shared_lock resizeGuard(resizeMutex);
+     int lockIndex = getLockIndex(key);
+     std::unique_lock lock(locks[lockIndex]);
     SinglyLinkedList<K, V>& l = arr[ind];
     int res = l.deleteBySearch(key);
     if (res) size--;
@@ -122,6 +154,12 @@ int Hashtable<K, V>::remove(K key) {
 
 template <typename K, typename V>
 std::deque<K> Hashtable<K,V>::keys() {
+     std::shared_lock resizeGuard(resizeMutex);
+     std::array<std::unique_lock<std::shared_mutex>,NUM_LOCKS> lockGuards;
+     for(int i = 0; i < NUM_LOCKS; i++){
+         lockGuards[i] = std::unique_lock(locks[i]);
+     }
+    
     std::deque<K> out;
 
     for(int i = 0; i < this->capacity; i++){
@@ -146,7 +184,11 @@ template <typename K, typename V>
 
 template<typename K, typename V>
 std::string Hashtable<K,V>::table_toString() {
-
+     std::shared_lock resizeGuard(resizeMutex);
+ std::array<std::unique_lock<std::shared_mutex>,NUM_LOCKS> lockGuards;
+     for(int i = 0; i < NUM_LOCKS; i++){
+         lockGuards[i] = std::unique_lock(locks[i]);
+     }
     std::string out = "\n";
     for(int i = 0; i < this->capacity; i++){
         SinglyLinkedList<K,V>& l = arr[i];

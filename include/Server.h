@@ -3,6 +3,7 @@
 #include "Connection.h"
 #include <poll.h>
 #include <atomic>
+#include "datastore.h"
 class Server {
     int accepting_fd;
     // fds take smallest possible non negative number, so a dynamic array will be better
@@ -21,6 +22,7 @@ class Server {
     static const size_t k_max_msg;
     friend class Connection;
     friend void handle_sig(int signal);
+    friend void expiry_ttl(Storage* storage);
 
 
 

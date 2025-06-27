@@ -41,7 +41,7 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
     Logger::log(logMessage);
     }
 
-   // if(res.status == OK) storage->write();
+   
     Type::write(output, res);
 }
 

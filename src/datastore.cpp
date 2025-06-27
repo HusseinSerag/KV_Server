@@ -27,20 +27,20 @@ Storage* Storage::getInstance() {
 
 Value** Storage::get(const std::string& key){
     Value** val = this->table->get(key);
-    if(val == NULL) return val;
-    std::chrono::steady_clock::time_point* exp = this->expires->get(key);
-    if(exp != NULL){
-        if(std::chrono::steady_clock::now() >= *exp){
-            this->table->remove(key);
+    // if(val == NULL) return val;
+    // std::chrono::steady_clock::time_point* exp = this->expires->get(key);
+    // if(exp != NULL){
+    //     if(std::chrono::steady_clock::now() >= *exp){
+    //         this->table->remove(key);
 
-            if(this->expires->remove(key)){
-                this->writeExpiry();
-            }
-            this->writeData();
-            return NULL;
-        }
-    }
-    return val; 
+    //         if(this->expires->remove(key)){
+    //             this->writeExpiry();
+    //         }
+    //         this->writeData();
+    //         return NULL;
+    //     }
+    // }
+     return val; 
    
 }
 
@@ -71,8 +71,9 @@ void Storage::set(const std::string& key, Value* val, int ttl){
 
     setTTL(key,ttl);
 }
-Storage::Storage(){
 
+Storage::Storage(){
+    
     table = nullptr;
     expires = nullptr;
 // try to load from disk first
@@ -112,6 +113,7 @@ Storage::~Storage() {
         delete expires;
         expires = nullptr;
     }
+    
 }
 
 void Storage::deleteInstance() {
