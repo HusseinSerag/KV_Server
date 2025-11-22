@@ -22,7 +22,7 @@ class Server {
     static const size_t k_max_msg;
     friend class Connection;
     friend void handle_sig(int signal);
-    friend void expiry_ttl(Storage* storage);
+    friend void Storage::expiry_ttl();
 
 
 

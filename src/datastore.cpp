@@ -16,6 +16,7 @@
 #include "StringListValue.h"
 #include "NumberListValue.h"
 #include "chrono"
+#include "Server.h"
 Storage* Storage::instance = nullptr;
 
 Storage* Storage::getInstance() {
@@ -185,6 +186,38 @@ void Storage::saveExpiry(std::ostream& out){
 
    }
 }
+
+void Storage::expiry_ttl() {
+    int i = 0;
+  
+    while(!Server::should_exit){
+ 
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        i++;
+        if(expires->getSize() > 0){
+            for(int i = 0; i < expires->getCapacity();i++){
+               SinglyLinkedList<std::string,std::chrono::steady_clock::time_point>& l = expires->getArr()[i];
+               auto head = l.getHead();
+               while(head != NULL){
+                 auto next = head->getNext();
+                    if(std::chrono::steady_clock::now() >= head->getValue()){
+                            table->remove(head->getKey());
+                            if(expires->remove(head->getKey())){
+                               writeExpiry();
+                            }
+                            writeData();
+                        }
+                        head = next;
+                    }
+               }
+
+               
+            
+        }
+    }
+};
+
+
 void Storage::saveData(std::ostream& out) {
 
         if(!out){

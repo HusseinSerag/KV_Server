@@ -13,12 +13,12 @@ class Storage {
     ~Storage();
     static Storage* instance;
     void load(std::istream &in);
-    
     void saveExpiry(std::ostream& out);
     void saveData(std::ostream& out);
     bool isEnabled;
     Hashtable<std::string,std::chrono::steady_clock::time_point>* expires;
-    
+    Storage(const Storage&)=delete;
+    Storage& operator=(const Storage&)=delete;
     public:
     Hashtable<std::string, Value*>* table;
     static Storage* getInstance();
@@ -29,7 +29,7 @@ class Storage {
     int remove(const std::string& key);
     void set(const std::string& key, Value* val, int ttl = -1);
     void setTTL(const std::string& key, int ttl);
-    friend void expiry_ttl(Storage* storage);
+    void expiry_ttl();
 
 };
 
