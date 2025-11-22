@@ -8,7 +8,8 @@
 #include <csignal>
 #include <cstdlib>
 #include "thread_gaurd.h"
-
+#include "ConcurrentQueue.h"
+#include "command_handler.h"
 
 
 
@@ -23,6 +24,16 @@ void handle_sig(int signal) {
 }
   
 
+void handleLogging(ConcurrentQueue* queue) {
+    Logger::open();
+
+    while(true) {
+        auto msg  = queue->consume();
+        Logger::log(msg);
+    }
+
+}
+
 int main(int argc, char* argv[]) {
     std::signal(SIGINT, handle_sig);
     std::signal(SIGABRT,handle_sig);
@@ -32,13 +43,23 @@ int main(int argc, char* argv[]) {
        std::cerr << config->getErrors() << std::endl;
        return -1;
    }
-    Logger::open();
-    server.configure(std::stoi(config->get("port")));
+   
+   server.configure(std::stoi(config->get("port")));
+     ConcurrentQueue* queue = new ConcurrentQueue();
    Storage* storage = Storage::getInstance();
+   
+     std::thread loggingThread(handleLogging, queue);
+     
+    CommandHandler::setQueue(queue);
+     
     std::thread thr(&Storage::expiry_ttl, storage);
     thread_gaurd gaurd(thr, 0);
+     thread_gaurd g(loggingThread,0);
+      
+   
     server.start();
     cleanup();
+    delete queue;
 
     return 0;
 }

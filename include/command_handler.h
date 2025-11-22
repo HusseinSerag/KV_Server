@@ -4,11 +4,18 @@
 #include <vector>
 #include "Type.h"
 #include "Response.h"
+#include "ConcurrentQueue.h"
 
 
 
 class CommandHandler {
+   static ConcurrentQueue* queue;
+
 public:
+    
+static void setQueue(ConcurrentQueue* q) {
+  queue = q;
+}
 static void writeResponse(std::vector<uint8_t>& output, const std::string& data, Response& out);
 
 

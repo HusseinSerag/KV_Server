@@ -17,8 +17,9 @@
 #include "List.h"
 #include "StringList.h"
 #include "NumberList.h"
+#include "ConcurrentQueue.h"
 
-
+ConcurrentQueue* CommandHandler::queue = nullptr;
 void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::string& data, Response& out) {
  // write length of response which is status plus size of data
     uint32_t resp_length = 4 + data.size();
@@ -38,7 +39,8 @@ void CommandHandler::writeResponse(std::vector<uint8_t>& output, const std::stri
     }
     if(!hasExecuted){
         std::string logMessage = Helper::getCurrentTimestamp() +" | Status: " + (res.status == OK ? "Success" : "Error") + (res.status != OK ? " | Reason: " + res.output : "");
-    Logger::log(logMessage);
+        queue->put(logMessage);
+    //Logger::log(logMessage);
     }
 
    

@@ -12,8 +12,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -- -j$(nproc)
 
 # Run the server
-./build/server_exec --port=$1 --persistence=$2 --log_enabled=0
+./build/server_exec --port=$1 --persistence=1 --log_enabled=1
 
 
-//cd build && cmake  .. && make && cd .. && ./build/server_exec --port=$1 --persistence=$2 --log_enabled=0
+#cd build && cmake  .. && make && cd .. && ./build/server_exec --port=$1 --persistence=$2 --log_enabled=1
 #cd build && cmake  .. && make && cd .. && ./valgrind_test.sh $1
