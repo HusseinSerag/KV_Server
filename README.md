@@ -8,7 +8,7 @@
 
 A fast, minimal, and extensible key-value store written in C++ for UNIX-based systems. Built with low-level control in mind, it uses custom non-blocking sockets and an efficient hashtable for performance. The store supports multiple types, including ordered list types using red-black trees, and introduces TTL (Time-To-Live) support for expirable keys. There are no external dependencies.
 
-The architecture is designed for simplicity and speed, focusing on deep control of memory, sockets, and file I/O.
+The architecture is designed for simplicity and speed, focusing on deep control of memory, sockets, file I/O and multi-threading.
 
 ---
 
@@ -24,6 +24,7 @@ The architecture is designed for simplicity and speed, focusing on deep control 
 *  Python script for load testing
 *  Built with CMake for easy build setup
 *  Clean codebase separation (client, server, shared logic)
+*  Producer-Consumer Pattern for logging using Semaphores
 
 ---
 
